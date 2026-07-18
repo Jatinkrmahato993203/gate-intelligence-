@@ -12,15 +12,15 @@
        DESIGN TOKENS — from DESIGN.md
        ============================================================ */
     :root {
-      --color-ops-black: #05050a;
-      --color-ops-white: #ffffff;
-      --color-gold: #00E5FF; /* Vivid Cyan */
-      --color-gold-dark: #00B8CC;
-      --color-green: #39FF14; /* Electric Green */
-      --color-amber: #FF1053; /* Hot Pink */
+      --color-ops-black: #f8fafc;
+      --color-ops-white: #0f172a;
+      --color-gold: #008b9b;
+      --color-gold-dark: #007380;
+      --color-green: #1f9907;
+      --color-amber: #c4063c;
       --color-red: #D9004C; 
-      --color-surface-ops: #0a0b14;
-      --color-border-ops: #1a1c2e;
+      --color-surface-ops: #ffffff;
+      --color-border-ops: #e2e8f0;
 
       --color-fan-bg: #f8fafc; /* Replaced with gradient in app-fan directly */
       --color-fan-surface: #ffffff;
@@ -116,44 +116,61 @@
     
     /* Login App Styles */
     #app-login {
-      background: var(--color-ops-black);
+      background: radial-gradient(circle at top left, #001a1c 0%, var(--color-ops-black) 50%, #00151a 100%);
       align-items: center; justify-content: center;
       font-family: var(--font-ops);
+      position: relative;
+    }
+    #app-login::before {
+      content: ''; position: absolute; top: -20%; left: -10%; width: 50%; height: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, transparent 70%); filter: blur(60px); z-index: 0;
     }
     .login-container {
-      width: 100%; max-width: 400px;
-      background: var(--color-surface-ops);
-      border: 1px solid var(--color-border-ops);
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      width: 100%; max-width: 420px; z-index: 1;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: fadeInSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
     }
-    .login-box h2 { margin: 0 0 10px 0; color: #fff; font-size: 24px; font-weight: 600; }
-    .login-box p { margin: 0 0 30px 0; color: #888; font-size: 13px; line-height: 1.5; }
-    .input-group { margin-bottom: 20px; text-align: left; }
+    .login-box h2 { margin: 0 0 8px 0; color: #fff; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+    .login-box p { margin: 0 0 32px 0; color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .input-group { margin-bottom: 24px; text-align: left; position: relative; }
     .input-group label {
       display: block; font-size: 11px; font-weight: 600;
-      color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+      color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;
     }
     .input-group input {
-      width: 100%; background: #0a0a0a; border: 1px solid #333;
-      color: #fff; padding: 12px 16px; border-radius: 6px;
-      font-family: var(--font-mono); font-size: 14px; box-sizing: border-box;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff; padding: 14px 16px; border-radius: var(--radius-md);
+      font-family: var(--font-mono); font-size: 15px; box-sizing: border-box;
+      transition: all 0.3s ease;
     }
+    .input-group input:hover { border-color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); }
     .input-group input:focus {
-      outline: none; border-color: var(--color-gold);
-      box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+      outline: none; border-color: var(--color-mint);
+      background: rgba(0,0,0,0.8);
+      box-shadow: 0 0 0 4px rgba(0, 229, 255, 0.15);
     }
     .login-submit {
-      width: 100%; padding: 14px; background: var(--color-gold); color: #000;
-      border: none; border-radius: 6px; font-family: var(--font-ops); font-weight: 700;
-      font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
-      cursor: pointer; transition: transform 0.2s, background 0.2s;
-      margin-top: 10px; box-sizing: border-box;
+      width: 100%; padding: 16px; margin-top: 16px;
+      background: linear-gradient(135deg, var(--color-mint) 0%, #00b8cc 100%);
+      color: #0f172a; border: none; border-radius: var(--radius-md); 
+      font-family: var(--font-ops); font-weight: 700; font-size: 15px; 
+      text-transform: uppercase; letter-spacing: 0.1em;
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
     }
-    .login-submit:hover { background: #facc15; transform: translateY(-1px); }
-    .login-submit:active { transform: translateY(0); }
+    .login-submit:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.4); 
+      background: linear-gradient(135deg, #33ebff 0%, var(--color-mint) 100%);
+    }
+    .login-submit:active { transform: translateY(0) scale(0.98); box-shadow: 0 2px 8px rgba(0, 229, 255, 0.3); }
     .login-error { color: #ef4444; font-size: 12px; margin-bottom: 15px; min-height: 14px; }
     .live-badge {
       display: flex; align-items: center; gap: 6px;
@@ -170,23 +187,30 @@
        PANEL SYSTEM
        ============================================================ */
     .app-panel:not(.active) { display: none !important; }
-    .app-panel.active { display: flex; flex-direction: column; min-height: calc(100vh - 52px); }
+    .app-panel.active { 
+      display: flex; flex-direction: column; min-height: calc(100vh - 52px); 
+      animation: fadeInSlideUp 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    @keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* ============================================================
        OPS CONSOLE
        ============================================================ */
     #app-ops {
-      background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.1) 0%, transparent 40%),
-                  radial-gradient(circle at bottom left, rgba(255, 16, 83, 0.1) 0%, transparent 40%),
-                  var(--color-ops-black);
+      background: radial-gradient(circle at top right, #f8fafc 0%, #e2e8f0 100%);
       font-family: var(--font-ops);
+      display: flex; flex-direction: column;
     }
     .ops-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px var(--spacing-lg);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 0 var(--spacing-lg);
+      height: 52px;
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       flex-shrink: 0;
       z-index: 10;
     }
@@ -211,12 +235,11 @@
 
     /* ---- Left: Gate List ---- */
     .ops-gate-list {
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(8px);
       overflow-y: auto;
-      padding: var(--spacing-md);
-      display: flex; flex-direction: column; gap: var(--spacing-sm);
+      display: flex; flex-direction: column;
     }
     .section-label {
       font-size: 10px; font-weight: 600;
@@ -227,116 +250,103 @@
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--color-border-ops); }
 
     .gate-card {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 12px 10px 14px;
-      background: rgba(10, 11, 20, 0.6);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-md);
-      cursor: pointer; transition: all .2s;
-      position: relative; overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-bottom: 1px solid var(--color-border-ops);
+      background: transparent;
+      display: flex; flex-direction: column; gap: 4px;
+      cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+      animation: fadeInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
     }
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .gate-card:nth-child(1) { animation-delay: 0.05s; }
+    .gate-card:nth-child(2) { animation-delay: 0.10s; }
+    .gate-card:nth-child(3) { animation-delay: 0.15s; }
+    .gate-card:nth-child(4) { animation-delay: 0.20s; }
+    .gate-card:nth-child(5) { animation-delay: 0.25s; }
+    .gate-card:nth-child(6) { animation-delay: 0.30s; }
+    .gate-card:nth-child(7) { animation-delay: 0.35s; }
+    .gate-card:nth-child(8) { animation-delay: 0.40s; }
     .gate-card::before {
-      content: ''; position: absolute;
-      left: 0; top: 0; bottom: 0; width: 3px;
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: #00687a;
     }
-    .gate-card.status-open::before { background: var(--color-green); }
-    .gate-card.status-caution::before { background: var(--color-amber); }
-    .gate-card.status-critical::before { background: var(--color-red); }
-    .gate-card:hover { border-color: #555; transform: translateX(2px); }
-    .gate-card.selected { border-color: var(--color-gold); background: rgba(255,215,0,.04); box-shadow: var(--shadow-gold); }
+    .gate-card.status-open::before { background: #00b8d4; }
+    .gate-card.status-caution::before { background: #f59e0b; }
+    .gate-card.status-critical::before { background: #d9004c; }
+    .gate-card.status-critical { background: rgba(252,232,238, 0.8); }
+    .gate-card.selected { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border-radius: 4px; margin: 2px 8px; border-bottom: none; box-shadow: var(--shadow-sm); }
+    .gate-card:hover:not(.selected):not(.status-critical) { 
+      background: rgba(255,255,255,0.8); 
+      transform: translateY(-2px); 
+      border-radius: 4px; margin: 2px 8px; border-bottom: none;
+      box-shadow: var(--shadow-md); 
+      z-index: 1;
+    }
 
-    .gate-card-left { display: flex; flex-direction: column; gap: 2px; }
-    .gate-card-id { font-size: 14px; font-weight: 700; color: var(--color-ops-white); }
-    .gate-card-meta { font-size: 11px; color: #666; }
-    .gate-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-    .gate-wait-num {
-      font-family: var(--font-mono); font-size: 20px; font-weight: 600;
-      line-height: 1; transition: color .4s;
-    }
-    .gate-wait-num.open { color: var(--color-green); }
-    .gate-wait-num.caution { color: var(--color-amber); }
-    .gate-wait-num.critical { color: var(--color-red); }
-    .gate-wait-unit { font-size: 10px; color: #555; }
-    .gate-trend { font-size: 11px; font-weight: 600; }
-    .gate-trend.up { color: var(--color-red); }
-    .gate-trend.down { color: var(--color-green); }
-    .gate-trend.stable { color: #555; }
+    .gate-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .gate-card-id { font-size: 14px; font-weight: 500; font-family: var(--font-fan); color: #334155; text-transform: uppercase; }
+
+    .gate-trend { font-size: 12px; font-family: var(--font-mono); font-weight: 600; }
+    .gate-trend.up { color: #d9004c; }
+    .gate-trend.down { color: #00b8d4; }
+    .gate-trend.stable { color: #94a3b8; }
+
+    .gate-card-meta { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+
+    .gate-wait { font-size: 16px; font-weight: 600; font-family: var(--font-mono); color: #1e293b; }
+    .gate-card.status-critical .gate-wait { color: #d9004c; }
+    .gate-wait span.unit { font-size: 9px; font-weight: 500; color: #64748b; margin-left: 2px; }
+
+    .gate-progress-bg { width: 100%; height: 4px; background: rgba(0,0,0,0.05); margin-top: 4px; border-radius: 999px; overflow: hidden; }
+    .gate-progress-fill { height: 100%; transition: width 0.3s; }
+    .gate-card.status-open .gate-progress-fill { background: #00b8d4; }
+    .gate-card.status-caution .gate-progress-fill { background: #f59e0b; }
+    .gate-card.status-critical .gate-progress-fill { background: #d9004c; }
 
     /* ---- Center ---- */
     .ops-center {
-      overflow-y: auto;
-      padding: var(--spacing-md);
-      display: flex; flex-direction: column; gap: var(--spacing-md);
+      background: rgba(255,255,255,0.15);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .ops-center-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+    }
+    .ops-center-title {
+      font-size: 14px; font-weight: 500; font-family: 'Space Grotesk', sans-serif; color: #00b8d4; text-transform: uppercase; letter-spacing: 0.1em;
+      margin: 0;
     }
 
     /* Heatmap */
     .heatmap-container {
-      background: var(--color-surface-ops);
-      border: 1px solid var(--color-border-ops);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md);
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
-    .heatmap-svg { width: 100%; height: 260px; }
+    .heatmap-svg { width: 100%; height: auto; max-width: none; min-height: 260px; max-height: 400px; }
 
-    /* Metrics row */
-    .metrics-row {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: var(--spacing-md);
+    /* Tournament Alerts */
+    .alert-container { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+    .alert-item {
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 16px; border-radius: 8px;
     }
-    .ops-panel {
-      background: rgba(10, 11, 20, 0.5);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-    .metric-card {
-      background: var(--color-surface-ops);
-      border: 1px solid var(--color-border-ops);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md);
-      position: relative; overflow: hidden;
-    }
-    .metric-card::after {
-      content: ''; position: absolute;
-      bottom: 0; left: 0; right: 0; height: 2px;
-    }
-    .metric-card.c-gold::after { background: var(--color-gold); }
-    .metric-card.c-green::after { background: var(--color-green); }
-    .metric-card.c-blue::after { background: #818cf8; }
-    .metric-card.c-amber::after { background: var(--color-amber); }
-    .metric-label { font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
-    .metric-value { font-family: var(--font-mono); font-size: 26px; font-weight: 600; line-height: 1; }
-    .metric-value.gold { color: var(--color-gold); }
-    .metric-value.green { color: var(--color-green); }
-    .metric-value.blue { color: #818cf8; }
-    .metric-value.amber { color: var(--color-amber); }
-    .metric-sub { font-size: 11px; color: #666; margin-top: 4px; }
+    .alert-icon { font-size: 20px; }
+    .alert-content { flex: 1; }
+    .alert-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .alert-msg { font-size: 11px; color: #888; }
+    .alert-time { font-family: var(--font-mono); font-size: 11px; color: #555; }
 
-    /* Funnel */
-    .funnel-chart { display: flex; flex-direction: column; gap: 5px; padding-top: 6px; }
-    .funnel-row { display: flex; align-items: center; gap: 7px; }
-    .funnel-label { width: 58px; font-size: 10px; color: #666; text-align: right; flex-shrink: 0; }
-    .funnel-track { flex: 1; height: 7px; background: rgba(255,255,255,.06); border-radius: 4px; overflow: hidden; }
-    .funnel-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
-    .funnel-pct { font-family: var(--font-mono); font-size: 11px; font-weight: 600; width: 34px; color: #ccc; }
-
-    /* Baseline comparison */
-    .baseline-section {
-      background: rgba(10, 11, 20, 0.5);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md);
-      display: flex; flex-direction: column; gap: var(--spacing-md);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    .baseline-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-md); }
-    .baseline-title { font-size: 14px; font-weight: 600; }
+    /* Replay scrubber */
+    .replay-scrubber { width: 100%; margin: 10px 0 4px; accent-color: #00b8d4; }
     .replay-btn {
       display: flex; align-items: center; gap: 6px;
       padding: 6px 14px;
@@ -372,65 +382,59 @@
     }
     .replay-scrubber { width: 100%; margin: 10px 0 4px; accent-color: var(--color-gold); }
 
-    /* ---- Right Rail ---- */
+    /* ---- Right: Sidebar ---- */
     .ops-sidebar {
-      border-left: 1px solid var(--color-border-ops);
-      background: #0a0a0a;
-      overflow-y: auto;
-      padding: var(--spacing-md);
-      display: flex; flex-direction: column; gap: var(--spacing-lg);
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(8px);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      display: flex; flex-direction: column; overflow-y: auto;
     }
+    .ops-sidebar-header {
+      padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.4);
+      display: flex; justify-content: space-between; align-items: center;
+      background: transparent;
+    }
+    .ops-sidebar-title { font-size: 14px; font-weight: 600; color: #1e293b; text-transform: uppercase; font-family: var(--font-ops); }
+    .ops-sidebar-badge { padding: 4px 8px; font-size: 10px; font-weight: 700; border-radius: 4px; }
+    .ops-sidebar-badge.critical { background: #d9004c; color: #fff; }
+    .ops-sidebar-badge.caution { background: #f59e0b; color: #fff; }
+    .ops-sidebar-badge.open { background: #00b8d4; color: #fff; }
+    
+    .ops-sidebar-content { padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+    .ops-metrics-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .ops-metric-box { 
+      background: rgba(255,255,255,0.7); 
+      backdrop-filter: blur(8px);
+      padding: 16px; border-radius: var(--radius-md);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      animation: fadeInSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ops-metric-box:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .ops-metric-box:nth-child(1) { animation-delay: 0.1s; }
+    .ops-metric-box:nth-child(2) { animation-delay: 0.15s; }
+    .ops-metric-box:nth-child(3) { animation-delay: 0.2s; }
+    .ops-metric-box:nth-child(4) { animation-delay: 0.25s; }
+    .ops-metric-label { font-size: 10px; color: #475569; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em; }
+    .ops-metric-val { font-size: 18px; font-weight: 600; font-family: var(--font-mono); color: #1e293b; }
+    .ops-metric-val span { font-size: 10px; font-weight: 500; color: #64748b; margin-left: 2px; }
+    .ops-metric-val.error { color: #d9004c; }
 
-    /* Incident card */
-    .incident-card {
-      background: rgba(239,68,68,.08);
-      border: 1px solid rgba(239,68,68,.35);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-md);
+    .ops-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ops-btn {
+      border: 1px solid #94a3b8; color: #1e293b; background: #ffffff;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 12px; border-radius: 4px;
+      cursor: pointer; transition: all 0.2s;
     }
-    .incident-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .incident-badge {
-      font-size: 10px; font-weight: 700; letter-spacing: .08em;
-      padding: 3px 8px; border-radius: 20px;
-      background: rgba(239,68,68,.2); color: var(--color-red);
-    }
-    .incident-time { font-family: var(--font-mono); font-size: 11px; color: #555; }
-    .incident-gate { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .incident-desc { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 10px; }
-    .ai-rec {
-      background: rgba(129,140,248,.08);
-      border: 1px solid rgba(129,140,248,.2);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      font-size: 12px; color: #a5b4fc;
-      margin-bottom: 10px;
-    }
-    .ai-rec-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #818cf8; margin-bottom: 3px; }
-
-    /* Quick actions */
-    .action-grid { display: flex; flex-direction: column; gap: 6px; }
-    .action-btn {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; padding: 11px 13px;
-      background: var(--color-surface-ops);
-      border: 1px solid var(--color-border-ops);
-      border-radius: var(--radius-md);
-      color: var(--color-ops-white);
-      font-family: var(--font-ops); font-size: 13px; font-weight: 500;
-      text-align: left; transition: all .15s;
-    }
-    .action-btn:hover { border-color: var(--color-gold); background: rgba(255,215,0,.05); }
-    .action-btn.primary { background: var(--color-gold); color: #000; border-color: var(--color-gold); font-weight: 600; }
-    .action-btn.primary:hover { background: #FFE033; }
-    .action-btn.danger { border-color: rgba(239,68,68,.4); }
-    .action-btn.danger:hover { border-color: var(--color-red); background: rgba(239,68,68,.06); }
-    .kbd {
-      margin-left: auto;
-      padding: 2px 6px; border-radius: 4px;
-      font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-      background: rgba(255,255,255,.08); color: #666;
-    }
-    .action-btn.primary .kbd { background: rgba(0,0,0,.15); color: rgba(0,0,0,.4); }
+    .ops-btn:hover { background: rgba(0, 104, 122, 0.05); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .ops-btn:active { transform: scale(0.98); }
+    .ops-btn.danger { background: #d9004c; color: #fff; border: none; }
+    .ops-btn.danger:hover { background: #b0003c; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .ops-btn.secondary { border-color: #94a3b8; color: #334155; }
+    .ops-btn.secondary:hover { background: rgba(0,0,0,0.05); }
     .action-toast {
       display: none; align-items: center; gap: 8px;
       padding: 10px 14px; border-radius: var(--radius-sm);
@@ -440,20 +444,21 @@
     }
     .action-toast.show { display: flex; }
 
-    /* System health */
-    .health-rows { display: flex; flex-direction: column; gap: 0; }
-    .health-row { padding: 9px 0; border-bottom: 1px solid var(--color-border-ops); }
-    .health-row:last-child { border-bottom: none; }
-    .health-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .health-key { font-size: 12px; color: #888; }
-    .health-val { font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
-    .health-val.good { color: var(--color-green); }
-    .health-val.warn { color: var(--color-amber); }
-    .health-val.bad { color: var(--color-red); }
-    .health-bar { height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
-    .health-fill { height: 100%; border-radius: 2px; transition: width .5s; }
-    .health-fill.good { background: var(--color-green); }
-    .health-fill.warn { background: var(--color-amber); }
+    .ops-health-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border-ops); padding-bottom: 8px; margin-bottom: 12px; }
+    .ops-health-title { font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.15em; }
+    
+    .ops-health-item { margin-bottom: 12px; }
+    .ops-health-row { display: flex; justify-content: space-between; font-size: 10px; font-family: var(--font-mono); margin-bottom: 4px; }
+    .ops-health-row .label { color: #1e293b; font-weight: 600; text-transform: uppercase; font-family: var(--font-ops); }
+    .ops-health-row .val { font-weight: 700; color: #00b8d4; }
+    .ops-health-row .val.amber { color: #f59e0b; }
+    
+    .ops-brief {
+      background: #e2e8f0; border: 1px solid var(--color-border-ops);
+      padding: 12px; border-radius: 4px;
+    }
+    .ops-brief-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: -0.05em; }
+    .ops-brief-text { font-size: 11px; color: #334155; line-height: 1.5; }
 
     /* ============================================================
        FAN APP
@@ -472,8 +477,10 @@
       width: 380px; flex-shrink: 0;
       padding: 48px var(--spacing-xl);
       display: flex; flex-direction: column; justify-content: center;
-      border-left: 1px solid var(--color-border-light);
-      background: var(--color-fan-surface);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.03);
     }
     .fan-right-title { font-size: 22px; font-weight: 600; color: var(--color-fan-text-primary); margin-bottom: 6px; }
     .fan-right-sub { font-size: 14px; color: var(--color-fan-text-secondary); line-height: 1.6; margin-bottom: var(--spacing-xl); }
@@ -482,7 +489,12 @@
       display: flex; align-items: flex-start; gap: 12px;
       padding: 12px 14px; border-radius: var(--radius-lg);
       border: 1px solid transparent; cursor: pointer; transition: all .2s;
+      animation: fadeInSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
     }
+    .fan-step:nth-child(1) { animation-delay: 0.1s; }
+    .fan-step:nth-child(2) { animation-delay: 0.2s; }
+    .fan-step:nth-child(3) { animation-delay: 0.3s; }
+    .fan-step:nth-child(4) { animation-delay: 0.4s; }
     .fan-step:hover { background: #f5f5ff; border-color: rgba(6,182,212,.2); }
     .fan-step.factive { background: rgba(6,182,212,.06); border-color: rgba(6,182,212,.3); }
     .step-num {
@@ -597,7 +609,8 @@
       background: var(--color-mint); color: white;
       box-shadow: 0 6px 18px rgba(6,182,212,.35);
     }
-    .fan-btn.primary:hover { background: var(--color-mint-dark); transform: translateY(-1px); }
+    .fan-btn.primary:hover { background: var(--color-mint-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(6,182,212,.5); }
+    .fan-btn.primary:active { transform: scale(0.98); }
     .fan-btn.secondary {
       background: transparent; color: var(--color-warm-stone);
       border: 1px solid var(--color-warm-stone);
@@ -616,10 +629,16 @@
     .screen-title { font-size: 20px; font-weight: 600; color: var(--color-fan-text-primary); line-height: 1.3; }
     .route-map-box {
       background: #f0fafe;
-      border: 1px solid rgba(6,182,212,.2);
+      border: 1px solid rgba(6,182,212,.4);
       border-radius: var(--radius-xl);
       overflow: hidden; height: 180px;
       display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(6,182,212,0.15);
+      animation: pulseGlow 3s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(6,182,212,0.1); }
+      to { box-shadow: 0 0 25px rgba(6,182,212,0.3); }
     }
     .route-svg { width: 100%; height: 100%; }
     .compare-bars { display: flex; flex-direction: column; gap: 8px; }
@@ -722,7 +741,7 @@
        STAFF APP
        ============================================================ */
     #app-staff {
-      background: #020205;
+      background: radial-gradient(circle at center, #1e1e24 0%, #000000 100%);
       font-family: var(--font-ops);
       display: flex;
       align-items: center;
@@ -827,7 +846,12 @@
     .staff-stat-cell {
       padding: 14px 18px;
       border-right: 2px solid #000; border-bottom: 2px solid #000;
+      animation: fadeInSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
     }
+    .staff-stat-cell:nth-child(1) { animation-delay: 0.1s; }
+    .staff-stat-cell:nth-child(2) { animation-delay: 0.2s; }
+    .staff-stat-cell:nth-child(3) { animation-delay: 0.3s; }
+    .staff-stat-cell:nth-child(4) { animation-delay: 0.4s; }
     .staff-stat-cell:nth-child(2n) { border-right: none; }
     .staff-stat-cell:nth-last-child(-n+2) { border-bottom: none; }
     .staff-stat-val { font-family: var(--font-mono); font-size: 28px; font-weight: 600; color: #000; line-height: 1; }
@@ -840,7 +864,8 @@
       border: none; border-radius: 4px;
       letter-spacing: .04em; transition: all .15s;
     }
-    .help-btn:hover { background: var(--color-gold); color: #000; transform: scale(1.02); }
+    .help-btn:hover { background: var(--color-gold); color: #000; transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .help-btn:active { transform: scale(0.98); }
     .connection-label { font-size: 11px; color: #aaa; text-align: center; }
 
     /* Staff screen 2 */
@@ -859,8 +884,17 @@
     .urgency-badge.high { background: rgba(239,68,68,.15); color: var(--color-red); }
     .staff-s2-body { flex: 1; display: flex; flex-direction: column; padding: 20px 18px; gap: 16px; }
     .instruction-card {
-      background: #000; border-radius: var(--radius-md);
-      padding: 22px; flex: 1;
+      background: rgba(30,30,40, 0.6); 
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+      border-radius: var(--radius-xl);
+      padding: 24px; flex: 1;
+      animation: pulseGlowGold 2s infinite alternate;
+    }
+    @keyframes pulseGlowGold {
+      from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+      to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.25); }
     }
     .instruction-verb { font-size: 32px; font-weight: 700; color: var(--color-gold); line-height: 1; margin-bottom: 8px; }
     .instruction-text { font-size: 20px; font-weight: 600; color: white; line-height: 1.3; }
@@ -990,7 +1024,7 @@
         </div>
         <div class="input-group">
           <label for="password">Password</label>
-          <input type="password" id="password" value="password" required autocomplete="current-password">
+          <input type="password" id="password" required autocomplete="new-password">
         </div>
         <div id="login-error" class="login-error"></div>
         <button type="submit" class="login-submit">Authenticate</button>
@@ -1006,11 +1040,20 @@
 
   <!-- Ops header -->
   <header class="ops-header">
-    <div class="ops-title">Command Center</div>
-    <div class="ops-meta">
-      <span class="ops-time" id="ops-clock">09:57:14</span>
-      <div class="status-pill ws">● WebSocket Connected</div>
-      <div class="status-pill gemini">✦ Gemini Active</div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7.5V16.5L12 22L22 16.5V7.5L12 2Z" fill="#facc15"/>
+      </svg>
+      <span style="font-size: 11px; letter-spacing: 0.1em; color: #00687a; font-weight: 600; text-transform: uppercase;">FIFA WORLD CUP 2026 · GATE OPS</span>
+    </div>
+
+    <div class="ops-meta" style="font-family: var(--font-mono); font-size: 10px; gap: 12px; letter-spacing: 0.1em;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #00b8d4; animation: blink 1.5s infinite;"></span>
+        <span style="color: #00b8d4; text-transform: uppercase; font-weight: 600; font-family: var(--font-fan);">LIVE MATCH MODE</span>
+      </div>
+      <span style="color: #94a3b8; font-weight: 500; font-family: var(--font-fan);">WC26-SF-04 | LUSAIL STADIUM</span>
+      <span class="ops-time" id="ops-clock" style="display:none"></span>
     </div>
   </header>
 
@@ -1027,14 +1070,16 @@
 
     <!-- CENTER: Heatmap + Metrics + Baseline -->
     <main class="ops-center" aria-label="Main content">
-      <div class="section-label" style="margin-bottom:0">Stadium Heatmap</div>
+      <div class="ops-center-header">
+        <h2 class="ops-center-title">Lusail Iconic Stadium · Matchday Heatmap</h2>
+      </div>
 
       <div class="heatmap-container">
         <svg class="heatmap-svg" viewBox="0 0 600 270" xmlns="http://www.w3.org/2000/svg" aria-label="Stadium zone heatmap">
           <!-- Background -->
-          <rect width="600" height="270" fill="#111"/>
+          <rect width="600" height="270" fill="transparent"/>
           <!-- Outer stadium -->
-          <ellipse cx="300" cy="135" rx="285" ry="125" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+          <ellipse cx="300" cy="135" rx="285" ry="125" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
           <!-- Zone coloring (updated by JS) -->
           <path id="zone-a" d="M 88,30 A 285,125 0 0,1 512,30 L 480,75 A 220,95 0 0,0 120,75 Z" fill="rgba(34,197,94,.1)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
           <path id="zone-b" d="M 512,30 A 285,125 0 0,1 585,135 L 540,135 A 220,95 0 0,0 480,75 Z" fill="rgba(34,197,94,.1)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
@@ -1043,190 +1088,62 @@
           <path id="zone-e" d="M 88,240 A 285,125 0 0,1 15,135 L 60,135 A 220,95 0 0,0 120,195 Z" fill="rgba(34,197,94,.1)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
           <path id="zone-f" d="M 15,135 A 285,125 0 0,1 88,30 L 120,75 A 220,95 0 0,0 60,135 Z" fill="rgba(34,197,94,.1)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
           <!-- Field -->
-          <ellipse cx="300" cy="135" rx="145" ry="82" fill="#0d2e0d" stroke="#1a4a1a" stroke-width="1"/>
-          <line x1="300" y1="53" x2="300" y2="217" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
-          <ellipse cx="300" cy="135" rx="38" ry="22" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
-          <text x="300" y="140" text-anchor="middle" fill="rgba(255,255,255,.08)" font-size="14" font-family="Space Grotesk" font-weight="700">FIELD</text>
+          <ellipse cx="300" cy="135" rx="145" ry="82" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+          <line x1="300" y1="53" x2="300" y2="217" stroke="rgba(0,0,0,.1)" stroke-width="1"/>
+          <ellipse cx="300" cy="135" rx="38" ry="22" fill="none" stroke="rgba(0,0,0,.1)" stroke-width="1"/>
+          <text x="300" y="140" text-anchor="middle" fill="rgba(0,0,0,.2)" font-size="14" font-family="Space Grotesk" font-weight="700">FIELD</text>
           <!-- Zone labels -->
-          <text x="300" y="55" text-anchor="middle" fill="rgba(255,255,255,.15)" font-size="11" font-family="Space Grotesk" font-weight="600">NORTH</text>
-          <text x="565" y="140" text-anchor="middle" fill="rgba(255,255,255,.15)" font-size="11" font-family="Space Grotesk" font-weight="600">EAST</text>
-          <text x="300" y="260" text-anchor="middle" fill="rgba(255,255,255,.15)" font-size="11" font-family="Space Grotesk" font-weight="600">SOUTH</text>
-          <text x="35" y="140" text-anchor="middle" fill="rgba(255,255,255,.15)" font-size="11" font-family="Space Grotesk" font-weight="600">WEST</text>
+          <text x="300" y="55" text-anchor="middle" fill="rgba(0,0,0,.3)" font-size="11" font-family="Space Grotesk" font-weight="600">NORTH</text>
+          <text x="565" y="140" text-anchor="middle" fill="rgba(0,0,0,.3)" font-size="11" font-family="Space Grotesk" font-weight="600">EAST</text>
+          <text x="300" y="260" text-anchor="middle" fill="rgba(0,0,0,.3)" font-size="11" font-family="Space Grotesk" font-weight="600">SOUTH</text>
+          <text x="35" y="140" text-anchor="middle" fill="rgba(0,0,0,.3)" font-size="11" font-family="Space Grotesk" font-weight="600">WEST</text>
           <!-- Gate markers (positions set to match ellipse perimeter) -->
           <!-- A1 NW, A2 N, B1 NE, B2 E, C1 SE, C2 S, D1 SW, D2 W -->
-          <g id="gate-marker-A1"><circle cx="158" cy="42" r="18" fill="#22c55e" opacity=".25" stroke="#22c55e" stroke-width="1.5"/><text x="158" y="44" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">A1</text><text id="hm-wait-A1" x="158" y="57" text-anchor="middle" font-size="9" fill="#22c55e" font-family="IBM Plex Mono">4m</text></g>
-          <g id="gate-marker-A2"><circle cx="300" cy="14" r="18" fill="#f59e0b" opacity=".25" stroke="#f59e0b" stroke-width="1.5"/><text x="300" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">A2</text><text id="hm-wait-A2" x="300" y="29" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="IBM Plex Mono">18m</text></g>
-          <g id="gate-marker-B1"><circle cx="442" cy="42" r="18" fill="#22c55e" opacity=".25" stroke="#22c55e" stroke-width="1.5"/><text x="442" y="44" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">B1</text><text id="hm-wait-B1" x="442" y="57" text-anchor="middle" font-size="9" fill="#22c55e" font-family="IBM Plex Mono">7m</text></g>
-          <g id="gate-marker-B2"><circle cx="582" cy="105" r="18" fill="#22c55e" opacity=".25" stroke="#22c55e" stroke-width="1.5"/><text x="582" y="107" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">B2</text><text id="hm-wait-B2" x="582" y="120" text-anchor="middle" font-size="9" fill="#22c55e" font-family="IBM Plex Mono">5m</text></g>
-          <g id="gate-marker-C1"><circle cx="582" cy="165" r="18" fill="#f59e0b" opacity=".25" stroke="#f59e0b" stroke-width="1.5"/><text x="582" y="167" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">C1</text><text id="hm-wait-C1" x="582" y="180" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="IBM Plex Mono">13m</text></g>
-          <g id="gate-marker-C2"><circle cx="442" cy="228" r="18" fill="#ef4444" opacity=".25" stroke="#ef4444" stroke-width="1.5"/><text x="442" y="230" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">C2</text><text id="hm-wait-C2" x="442" y="243" text-anchor="middle" font-size="9" fill="#ef4444" font-family="IBM Plex Mono">22m</text></g>
-          <g id="gate-marker-D1"><circle cx="158" cy="228" r="18" fill="#ef4444" opacity=".25" stroke="#ef4444" stroke-width="1.5"/><text x="158" y="230" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">D1</text><text id="hm-wait-D1" x="158" y="243" text-anchor="middle" font-size="9" fill="#ef4444" font-family="IBM Plex Mono">19m</text></g>
-          <g id="gate-marker-D2"><circle cx="18" cy="165" r="18" fill="#22c55e" opacity=".25" stroke="#22c55e" stroke-width="1.5"/><text x="18" y="167" text-anchor="middle" font-size="10" font-weight="700" fill="white" font-family="Space Grotesk">D2</text><text id="hm-wait-D2" x="18" y="180" text-anchor="middle" font-size="9" fill="#22c55e" font-family="IBM Plex Mono">6m</text></g>
+          <g id="gate-marker-A1"><circle cx="158" cy="27" r="24" fill="#22c55e" opacity="0.2"/><text id="hm-id-A1" x="158" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d" font-family="Space Grotesk">A1</text><text id="hm-wait-A1" x="158" y="36" text-anchor="middle" font-size="9" fill="#15803d" font-family="IBM Plex Mono">4m</text></g>
+          <g id="gate-marker-A2"><circle cx="300" cy="10" r="24" fill="#f59e0b" opacity="0.2"/><text id="hm-id-A2" x="300" y="7" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309" font-family="Space Grotesk">A2</text><text id="hm-wait-A2" x="300" y="19" text-anchor="middle" font-size="9" fill="#b45309" font-family="IBM Plex Mono">18m</text></g>
+          <g id="gate-marker-B1"><circle cx="442" cy="27" r="24" fill="#22c55e" opacity="0.2"/><text id="hm-id-B1" x="442" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d" font-family="Space Grotesk">B1</text><text id="hm-wait-B1" x="442" y="36" text-anchor="middle" font-size="9" fill="#15803d" font-family="IBM Plex Mono">7m</text></g>
+          <g id="gate-marker-B2"><circle cx="585" cy="135" r="24" fill="#22c55e" opacity="0.2"/><text id="hm-id-B2" x="585" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d" font-family="Space Grotesk">B2</text><text id="hm-wait-B2" x="585" y="144" text-anchor="middle" font-size="9" fill="#15803d" font-family="IBM Plex Mono">5m</text></g>
+          <g id="gate-marker-C1"><circle cx="546" cy="197" r="24" fill="#f59e0b" opacity="0.2"/><text id="hm-id-C1" x="546" y="194" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309" font-family="Space Grotesk">C1</text><text id="hm-wait-C1" x="546" y="206" text-anchor="middle" font-size="9" fill="#b45309" font-family="IBM Plex Mono">13m</text></g>
+          <g id="gate-marker-C2"><circle cx="442" cy="243" r="24" fill="#ef4444" opacity="0.2"/><text id="hm-id-C2" x="442" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c" font-family="Space Grotesk">C2</text><text id="hm-wait-C2" x="442" y="252" text-anchor="middle" font-size="9" fill="#b91c1c" font-family="IBM Plex Mono">22m</text></g>
+          <g id="gate-marker-D1"><circle cx="158" cy="243" r="24" fill="#ef4444" opacity="0.2"/><text id="hm-id-D1" x="158" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c" font-family="Space Grotesk">D1</text><text id="hm-wait-D1" x="158" y="252" text-anchor="middle" font-size="9" fill="#b91c1c" font-family="IBM Plex Mono">19m</text></g>
+          <g id="gate-marker-D2"><circle cx="15" cy="135" r="24" fill="#22c55e" opacity="0.2"/><text id="hm-id-D2" x="15" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d" font-family="Space Grotesk">D2</text><text id="hm-wait-D2" x="15" y="144" text-anchor="middle" font-size="9" fill="#15803d" font-family="IBM Plex Mono">6m</text></g>
         </svg>
       </div>
 
-      <!-- Metrics row -->
-      <div class="metrics-row">
-        <div class="metric-card c-gold">
-          <div class="metric-label">Nudges Sent Today</div>
-          <div class="metric-value gold" id="m-nudges">142</div>
-          <div class="metric-sub">+18 this hour</div>
+      <!-- Tournament Alerts -->
+      <div style="border: 1px solid #d9004c; background: #ffffff; padding: 16px; margin: 0 24px 24px 24px; position: relative;">
+        <div style="font-size: 11px; font-weight: 700; color: #d9004c; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; margin-bottom: 16px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d9004c" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          TOURNAMENT ALERTS
         </div>
-        <div class="metric-card c-green">
-          <div class="metric-label">Success Rate</div>
-          <div class="metric-value green" id="m-rate">89%</div>
-          <div class="metric-sub">126 confirmed</div>
-        </div>
-        <div class="metric-card c-blue">
-          <div class="metric-label">Forecast MAPE</div>
-          <div class="metric-value blue" id="m-mape">4.2%</div>
-          <div class="metric-sub">↓ improving</div>
-        </div>
-        <div class="metric-card c-amber">
-          <div class="metric-label">Conversion Funnel</div>
-          <div class="metric-value" style="font-size:14px;padding-top:4px">
-            <div class="funnel-chart">
-              <div class="funnel-row">
-                <div class="funnel-label">Nudge</div>
-                <div class="funnel-track"><div class="funnel-fill" style="width:100%;background:#818cf8"></div></div>
-                <div class="funnel-pct">100%</div>
-              </div>
-              <div class="funnel-row">
-                <div class="funnel-label">Route</div>
-                <div class="funnel-track"><div class="funnel-fill" style="width:91%;background:#06b6d4"></div></div>
-                <div class="funnel-pct">91%</div>
-              </div>
-              <div class="funnel-row">
-                <div class="funnel-label">Confirm</div>
-                <div class="funnel-track"><div class="funnel-fill" style="width:89%;background:#22c55e"></div></div>
-                <div class="funnel-pct">89%</div>
-              </div>
-              <div class="funnel-row">
-                <div class="funnel-label">Feedback</div>
-                <div class="funnel-track"><div class="funnel-fill" style="width:62%;background:#f59e0b"></div></div>
-                <div class="funnel-pct">62%</div>
-              </div>
+        <div style="display: flex; gap: 24px;">
+          <div style="flex: 1; border-left: 4px solid #d9004c; background: rgba(217, 0, 76, 0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #1e293b; font-family: var(--font-ops); text-transform: uppercase;">SENSOR FAULT - GATE 04</div>
+              <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Scanner 042 latency high</div>
             </div>
+            <div style="font-size: 9px; font-weight: 700; color: #d9004c; font-family: var(--font-mono);">03:42 ago</div>
+          </div>
+          <div style="flex: 1; border-left: 4px solid #d9004c; background: rgba(217, 0, 76, 0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #1e293b; font-family: var(--font-ops); text-transform: uppercase;">DENSITY WARNING - GATE 07</div>
+              <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Zone C overflow predicted</div>
+            </div>
+            <div style="font-size: 9px; font-weight: 700; color: #d9004c; font-family: var(--font-mono);">01:12 ago</div>
           </div>
         </div>
       </div>
-
-      <!-- Baseline Comparison -->
-      <div class="baseline-section">
-        <div class="baseline-header">
-          <div class="header-title">Toronto / Mexico City Incident</div>
-          <button class="replay-btn" id="replay-btn" onclick="toggleReplay()">▶ Start Replay</button>
-        </div>
-        <div class="baseline-tracks">
-          <div class="baseline-track without">
-            <div class="track-label">🔴 Without GIE (Manual Ops)</div>
-            <div class="track-bar"><div class="track-fill" id="without-fill" style="width:0%"></div></div>
-            <div class="track-stats">
-              <div><div class="track-stat-val" style="color:#ef4444" id="without-queue">—</div><div class="track-stat-key">Peak Queue</div></div>
-              <div><div class="track-stat-val" style="color:#ef4444" id="without-wait">—</div><div class="track-stat-key">Avg Wait</div></div>
-              <div><div class="track-stat-val" style="color:#ef4444" id="without-incidents">—</div><div class="track-stat-key">Incidents</div></div>
-              <div><div class="track-stat-val" style="color:#ef4444" id="without-time">—</div><div class="track-stat-key">Resolution</div></div>
-            </div>
-          </div>
-          <div class="baseline-track with">
-            <div class="track-label">🟢 With GIE (AI Active)</div>
-            <div class="track-bar"><div class="track-fill" id="with-fill" style="width:0%"></div></div>
-            <div class="track-stats">
-              <div><div class="track-stat-val" style="color:#22c55e" id="with-queue">—</div><div class="track-stat-key">Peak Queue</div></div>
-              <div><div class="track-stat-val" style="color:#22c55e" id="with-wait">—</div><div class="track-stat-key">Avg Wait</div></div>
-              <div><div class="track-stat-val" style="color:#22c55e" id="with-incidents">—</div><div class="track-stat-key">Incidents</div></div>
-              <div><div class="track-stat-val" style="color:#22c55e" id="with-time">—</div><div class="track-stat-key">Resolution</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="callout-box" id="callout-box" style="display:none">
-          🎯 System detected surge 42 min before incident. Congestion cleared <strong>12 min faster</strong> than baseline. Nudges followed: <strong>89%</strong>.
-        </div>
-        <input type="range" class="replay-scrubber" id="replay-scrubber" min="0" max="90" value="0" style="display:none" oninput="scrubReplay(this.value)">
       </div>
     </main>
 
     <!-- RIGHT: Sidebar -->
-    <aside class="ops-sidebar" aria-label="Quick actions and health">
-
-      <!-- Active incident -->
-      <div>
-        <div class="section-label">Active Incidents (2)</div>
-        <div class="incident-card" style="margin-bottom:8px">
-          <div class="incident-header">
-            <div class="incident-badge">🔴 CRITICAL</div>
-            <div class="incident-time" id="inc-time-1">14:32</div>
-          </div>
-          <div class="incident-gate">Gate C2 — Zone South</div>
-          <div class="incident-desc">Queue surge: 2,100 fans in 8 min. Capacity at 96%. Trend ↑ +340 in 3 min.</div>
-          <div class="ai-rec">
-            <div class="ai-rec-label">✦ AI Recommendation</div>
-            Redirect fans to Gate B1 and B2. Fire nudge campaign to nearby zone. Expected relief in 6–8 min.
-          </div>
-        </div>
-        <div class="incident-card" style="background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3)">
-          <div class="incident-header">
-            <div class="incident-badge" style="background:rgba(245,158,11,.15);color:#f59e0b">🟡 CAUTION</div>
-            <div class="incident-time">14:28</div>
-          </div>
-          <div class="incident-gate">Gate A2 — Zone North</div>
-          <div class="incident-desc">Wait time elevated: 18 min. Sensor confidence 82%. Monitor.</div>
-        </div>
-      </div>
-
-      <!-- Quick actions -->
-      <div>
-        <div class="section-label">Quick Actions</div>
-        <div id="action-toast" class="action-toast"></div>
-        <div class="action-grid">
-          <button class="action-btn primary" onclick="quickAction('open')" id="qa-open">🔓 Open Gate <span class="kbd">1</span></button>
-          <button class="action-btn" onclick="quickAction('close')" id="qa-close">🔒 Close Gate <span class="kbd">2</span></button>
-          <button class="action-btn" onclick="quickAction('staff')" id="qa-staff">📢 Request Staff <span class="kbd">3</span></button>
-          <button class="action-btn" onclick="quickAction('nudge')" id="qa-nudge">📍 Nudge Campaign <span class="kbd">4</span></button>
-          <button class="action-btn danger" onclick="quickAction('incident')">🚨 Incident Mode</button>
-        </div>
-      </div>
-
-      <!-- System health -->
-      <div>
-        <div class="section-label">System Health</div>
-        <div class="health-rows">
-          <div class="health-row">
-            <div class="health-top">
-              <span class="health-key">Sensors Online</span>
-              <span class="health-val good" id="h-sensors">96%</span>
-            </div>
-            <div class="health-bar"><div class="health-fill good" id="h-sensors-bar" style="width:96%"></div></div>
-          </div>
-          <div class="health-row">
-            <div class="health-top">
-              <span class="health-key">API Latency</span>
-              <span class="health-val good" id="h-api">142ms</span>
-            </div>
-            <div class="health-bar"><div class="health-fill good" id="h-api-bar" style="width:30%"></div></div>
-          </div>
-          <div class="health-row">
-            <div class="health-top">
-              <span class="health-key">WebSocket</span>
-              <span class="health-val good">● Connected</span>
-            </div>
-          </div>
-          <div class="health-row">
-            <div class="health-top">
-              <span class="health-key">Last Broadcast</span>
-              <span class="health-val good" id="h-broadcast">0.8s ago</span>
-            </div>
-          </div>
-          <div class="health-row">
-            <div class="health-top">
-              <span class="health-key">MAPE (24h)</span>
-              <span class="health-val good">4.2% ↓</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <aside class="ops-sidebar" id="ops-sidebar-container" aria-label="Quick actions and health">
+      <!-- Injected by JS renderSidebar() -->
     </aside>
+
+
+
+
   </div>
 </div>
 
@@ -1454,41 +1371,7 @@
     </div><!-- /phone-frame -->
   </div><!-- /fan-left -->
 
-  <!-- RIGHT: Step guide -->
-  <div class="fan-right">
-    <div class="fan-right-title">Fan Nudge Flow</div>
-    <div class="fan-right-sub">A 13-second journey from nudge to entry token. Each step closes the feedback loop.</div>
-    <div class="fan-steps">
-      <div class="fan-step factive" id="fs-1" onclick="goFanScreen(1)">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <div class="step-title">Nudge Notification</div>
-          <div class="step-desc">AI detects Gate C is 4 min faster. Fan receives instant recommendation.</div>
-        </div>
-      </div>
-      <div class="fan-step" id="fs-2" onclick="goFanScreen(2)">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <div class="step-title">Route Map</div>
-          <div class="step-desc">Walking path + live wait comparison. Confidence builds. Fan commits.</div>
-        </div>
-      </div>
-      <div class="fan-step" id="fs-3" onclick="goFanScreen(3)">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <div class="step-title">Entry Token Issued</div>
-          <div class="step-desc">UUID token stored locally. Valid for 20 min. Outcome now trackable.</div>
-        </div>
-      </div>
-      <div class="fan-step" id="fs-4" onclick="goFanScreen(4)">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <div class="step-title">Feedback Calibration</div>
-          <div class="step-desc">Actual wait → closes loop. MAPE improves with every submission.</div>
-        </div>
-      </div>
-    </div>
-  </div>
+
 </div>
 
 <!-- ==================================================
@@ -1496,25 +1379,7 @@
      ================================================== -->
 <div id="app-staff" class="app-panel" role="tabpanel">
 
-  <!-- Info panel -->
-  <div class="staff-info">
-    <div class="staff-info-title">Staff Console</div>
-    <div class="staff-info-sub">Neo-brutalist design. Readable at 2 meters. Multilingual. Three screens, one clear action per screen.</div>
-    <div class="staff-steps">
-      <div class="staff-step sactive" id="ss-1" onclick="goStaffScreen(1)">
-        <div class="staff-step-num">1</div>
-        <div class="staff-step-text">Gate Status — at a glance</div>
-      </div>
-      <div class="staff-step" id="ss-2" onclick="goStaffScreen(2)">
-        <div class="staff-step-num">2</div>
-        <div class="staff-step-text">Instruction — act with confidence</div>
-      </div>
-      <div class="staff-step" id="ss-3" onclick="goStaffScreen(3)">
-        <div class="staff-step-num">3</div>
-        <div class="staff-step-text">Confirmed — logged &amp; done</div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Tablet mockup -->
   <div class="tablet-frame" aria-label="Staff app tablet mockup">
@@ -1689,15 +1554,19 @@
       div.setAttribute('role', 'button');
       div.setAttribute('aria-label', `${g.name}, ${g.status}, ${g.wait} minute wait`);
       div.setAttribute('tabindex', '0');
+      const waitStr = String(g.wait).padStart(2, '0') + ':00';
+      const trendText = g.status === 'critical' ? '↑ 42%' : (g.status === 'open' ? '↓ 2%' : '→ 0%');
+      const trendClass = g.status === 'critical' ? 'up' : (g.status === 'open' ? 'down' : 'stable');
+      const perc = Math.min(100, Math.round((g.wait / 30) * 100));
       div.innerHTML = `
-        <div class="gate-card-left">
-          <div class="gate-card-id">${STATUS_ICONS[g.status]} ${g.name}</div>
-          <div class="gate-card-meta">Zone ${g.zone} · ${g.queue.toLocaleString()} fans</div>
+        <div class="gate-card-header">
+          <span class="gate-card-id">${g.name}</span>
+          <span class="gate-trend ${trendClass}">${trendText}</span>
         </div>
-        <div class="gate-card-right">
-          <div class="gate-wait-num ${g.status}" id="wait-${g.id}">${g.wait}</div>
-          <div class="gate-wait-unit">min</div>
-          <div class="gate-trend ${g.status==='critical'?'up':g.status==='open'?'down':'stable'}">${g.status==='critical'?'↑ +3':g.status==='open'?'↓ -1':'→ 0'}</div>
+        <div class="gate-card-meta">Zone ${g.zone} · ${g.queue.toLocaleString()} fans</div>
+        <div class="gate-wait"><span id="wait-${g.id}">${waitStr}</span> <span class="unit">MIN</span></div>
+        <div class="gate-progress-bg">
+          <div class="gate-progress-fill" id="wait-prog-${g.id}" style="width: ${perc}%"></div>
         </div>`;
       div.onclick = () => selectGate(g.id);
       div.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') selectGate(g.id); };
@@ -1705,12 +1574,95 @@
     });
   }
 
+  function renderSidebar(id) {
+    const container = document.getElementById('ops-sidebar-container');
+    if (!container) return;
+    if (!id) {
+      container.innerHTML = `<div style="padding: 24px; color: #94a3b8; text-align: center; font-size: 12px; text-transform: uppercase;">Select a gate to view details</div>`;
+      return;
+    }
+    const g = GATES.find(x => x.id === id);
+    if (!g) return;
+    
+    const waitMins = String(g.wait).padStart(2, '0');
+    const badgeHtml = g.status === 'critical' ? `<span class="ops-sidebar-badge critical">CRITICAL</span>` : (g.status === 'open' ? `<span class="ops-sidebar-badge open">NORMAL</span>` : `<span class="ops-sidebar-badge caution">CAUTION</span>`);
+    const valClass = g.status === 'critical' ? 'ops-metric-val error' : 'ops-metric-val';
+    
+    container.innerHTML = `
+      <div class="ops-sidebar-header">
+        <h2 class="ops-sidebar-title">${g.name} DETAILS</h2>
+        ${badgeHtml}
+      </div>
+      <div class="ops-sidebar-content">
+        <div id="action-toast" class="action-toast"></div>
+        <!-- Metrics Grid -->
+        <div class="ops-metrics-grid">
+          <div class="ops-metric-box">
+            <div class="ops-metric-label">Wait Time</div>
+            <div class="${valClass}">${waitMins}<span>m</span> 00<span>s</span></div>
+          </div>
+          <div class="ops-metric-box">
+            <div class="ops-metric-label">Queue Count</div>
+            <div class="${valClass}">${g.queue.toLocaleString()}</div>
+          </div>
+          <div class="ops-metric-box">
+            <div class="ops-metric-label">Flow Rate</div>
+            <div class="ops-metric-val">42<span>/min</span></div>
+          </div>
+          <div class="ops-metric-box">
+            <div class="ops-metric-label">Systems</div>
+            <div class="ops-metric-val" style="color:#00b8d4; font-size:14px;">● ACTIVE</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="ops-action-grid">
+          <button class="ops-btn" onclick="quickAction('open')">Unlock Gate</button>
+          <button class="ops-btn danger" onclick="quickAction('incident')">Emergency</button>
+          <button class="ops-btn secondary" onclick="quickAction('staff')">Deploy Staff</button>
+          <button class="ops-btn secondary" onclick="quickAction('nudge')">Push Nudge</button>
+        </div>
+
+        <!-- System Health -->
+        <div>
+          <div class="ops-health-header">
+            <span class="ops-health-title">Operations Health</span>
+          </div>
+          <div class="ops-health-item">
+            <div class="ops-health-row"><span class="label">Core Engine</span><span class="val">99.8%</span></div>
+            <div class="gate-progress-bg" style="margin-top:0"><div class="gate-progress-fill" style="background:#00b8d4; width:99.8%"></div></div>
+          </div>
+          <div class="ops-health-item">
+            <div class="ops-health-row"><span class="label">Crowd Prediction</span><span class="val amber">84.2%</span></div>
+            <div class="gate-progress-bg" style="margin-top:0"><div class="gate-progress-fill" style="background:#f59e0b; width:84.2%"></div></div>
+          </div>
+          <div class="ops-health-item">
+            <div class="ops-health-row"><span class="label">Network Latency</span><span class="val">12ms</span></div>
+            <div class="gate-progress-bg" style="margin-top:0"><div class="gate-progress-fill" style="background:#00b8d4; width:12%"></div></div>
+          </div>
+        </div>
+
+        <!-- Commissioner's Brief -->
+        <div class="ops-brief">
+          <div class="ops-brief-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00b8d4" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            COMMISSIONER'S BRIEF
+          </div>
+          <div class="ops-brief-text">${g.name} hardware sync in progress. Expected throughput normalization prior to Match Half-Time.</div>
+        </div>
+      </div>
+    `;
+  }
+
   function selectGate(id) {
     selectedGate = id;
     renderGateList();
+    renderSidebar(id);
     const g = GATES.find(x => x.id === id);
     showToast(`Gate ${id} selected — press 1–4 for quick actions`, false);
   }
+
+  renderSidebar(selectedGate);
 
   renderGateList();
 
@@ -1735,27 +1687,39 @@
       // Update gate card if it exists
       const waitEl = document.getElementById(`wait-${g.id}`);
       if (waitEl) {
-        waitEl.textContent = g.wait;
-        waitEl.className = `gate-wait-num ${g.status}`;
-        if (g.wait !== prev) {
-          const card = document.getElementById(`gate-card-${g.id}`);
-          if (card) {
-            card.className = `gate-card status-${g.status}${selectedGate===g.id?' selected':''}`;
-            card.classList.add('flashing');
-            setTimeout(() => card.classList.remove('flashing'), 600);
-          }
+        waitEl.textContent = String(g.wait).padStart(2, '0') + ':00';
+      }
+      const waitProg = document.getElementById(`wait-prog-${g.id}`);
+      if (waitProg) {
+        const perc = Math.min(100, Math.round((g.wait / 30) * 100));
+        waitProg.style.width = perc + '%';
+      }
+      if (g.wait !== prev) {
+        const card = document.getElementById(`gate-card-${g.id}`);
+        if (card) {
+          card.className = `gate-card status-${g.status}${selectedGate===g.id?' selected':''}`;
+          card.classList.add('flashing');
+          setTimeout(() => card.classList.remove('flashing'), 600);
         }
       }
       // Update heatmap labels
       const hmEl = document.getElementById(`hm-wait-${g.id}`);
+      const hmIdEl = document.getElementById(`hm-id-${g.id}`);
       if (hmEl) {
         hmEl.textContent = `${g.wait}m`;
-        hmEl.setAttribute('fill', g.status==='open'?'#22c55e':g.status==='caution'?'#f59e0b':'#ef4444');
       }
+      let cFill, cText;
+      if (g.status === 'open') { cFill = '#22c55e'; cText = '#15803d'; }
+      else if (g.status === 'caution') { cFill = '#f59e0b'; cText = '#b45309'; }
+      else { cFill = '#ef4444'; cText = '#b91c1c'; }
+
+      if (hmEl) hmEl.setAttribute('fill', cText);
+      if (hmIdEl) hmIdEl.setAttribute('fill', cText);
+
       const circle = document.querySelector(`#gate-marker-${g.id} circle`);
       if (circle) {
-        const c = g.status==='open'?'#22c55e':g.status==='caution'?'#f59e0b':'#ef4444';
-        circle.setAttribute('fill', c); circle.setAttribute('stroke', c);
+        circle.setAttribute('fill', cFill);
+        circle.removeAttribute('stroke');
       }
     });
     // Update route wait time on fan screen 2

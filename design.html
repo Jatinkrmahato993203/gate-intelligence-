@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-background": "#171d1e",
+                "primary-fixed": "#acedff",
+                "secondary-fixed": "#ffdcbc",
+                "secondary-fixed-dim": "#efbd8a",
+                "on-tertiary-fixed": "#2d1600",
+                "background": "#f5fafc",
+                "surface-container-highest": "#dee3e6",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "surface": "#f5fafc",
+                "on-primary-fixed": "#001f26",
+                "on-surface": "#171d1e",
+                "primary-container": "#06b6d4",
+                "surface-tint": "#00687a",
+                "outline-variant": "#bcc9cd",
+                "on-secondary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-error": "#ffffff",
+                "inverse-surface": "#2b3133",
+                "on-surface-variant": "#3d494c",
+                "tertiary-container": "#e89337",
+                "surface-container-low": "#eff4f7",
+                "secondary-container": "#fecb97",
+                "on-primary-fixed-variant": "#004e5c",
+                "surface-container-lowest": "#ffffff",
+                "surface-variant": "#dee3e6",
+                "surface-container-high": "#e3e9eb",
+                "on-secondary-fixed": "#2c1700",
+                "tertiary-fixed-dim": "#ffb873",
+                "on-primary-container": "#00424f",
+                "surface-container": "#e9eff1",
+                "surface-bright": "#f5fafc",
+                "error": "#ba1a1a",
+                "on-secondary-container": "#79542a",
+                "secondary": "#7c572d",
+                "on-secondary-fixed-variant": "#614018",
+                "outline": "#6d797d",
+                "tertiary-fixed": "#ffdcbf",
+                "primary-fixed-dim": "#4cd7f6",
+                "inverse-primary": "#4cd7f6",
+                "primary": "#00687a",
+                "inverse-on-surface": "#ecf2f4",
+                "surface-dim": "#d5dbdd",
+                "on-tertiary-fixed-variant": "#6a3b00",
+                "on-tertiary-container": "#5b3200",
+                "on-error-container": "#93000a",
+                "tertiary": "#8c5000"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "stack-sm": "8px",
+                "gutter": "12px",
+                "stack-lg": "24px",
+                "container-padding": "20px",
+                "stack-md": "16px",
+                "base": "4px"
+        },
+        "fontFamily": {
+                "headline-xl": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Space Grotesk"
+                ],
+                "data-sm": [
+                        "IBM Plex Mono"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "Space Grotesk"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "data-lg": [
+                        "IBM Plex Mono"
+                ],
+                "data-mono": ["IBM Plex Mono"]
+        },
+        "fontSize": {
+                "headline-xl": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "data-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "11px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "data-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script></head><body class="font-body-md bg-surface text-on-surface">
+<!-- Shader Background: Light with subtle Mint Cyan pulses -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute w-[500px] h-[500px] bg-primary-container/10 rounded-full blur-[100px] top-[-100px] left-[-100px] animate-[pulse_6s_ease-in-out_infinite]"></div>
+<div class="absolute w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] bottom-[-200px] right-[-200px] animate-[pulse_8s_ease-in-out_infinite_1s]"></div>
+</div>
+<!-- Grid Overlay -->
+<div class="fixed inset-0 grid-overlay pointer-events-none z-10 opacity-5" style="background-image: linear-gradient(to right, #00687a 1px, transparent 1px), linear-gradient(to bottom, #00687a 1px, transparent 1px); background-size: 40px 40px;"></div>
+<div class="relative z-20 flex flex-col h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 bg-surface-container-lowest border-b border-outline-variant h-[52px]">
+<div class="flex items-center gap-4">
+<img alt="Gate Intelligence Hexagon" class="w-8 h-8 opacity-80 mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_ToYU5klmrkTo7pJyL6huE7cYxkQESR-abEANbovxqWPPwG1n5eWQrk90Z8R0sGAu3gb0EB6neBlZsTLDefHR52CK0IkwkD0RWb6jhFXm9Ru5KKbupFtAFkRi3Ny7OEdGAyVby7012D2AaJ2arJN8D8OYL7XI1Cx9_tFqmyRXga7i80Em6prp3_xqJOcsjE8ORVSyFN4wRDGDIjTZPCdH8zatqmpULI9nGLB_Q21o15B5mdd0YU_fM3qruP6mUcyNRWa5XMdM1cGm"/>
+<span class="font-label-caps text-[12px] tracking-[0.08em] text-primary">FIFA WORLD CUP 2026 · GATE OPS</span>
+</div>
+<nav class="flex h-full items-center gap-8">
+<a class="font-label-caps text-primary border-b-2 border-primary h-full flex items-center px-1 transition-all active:scale-95" href="#">OPS CONSOLE</a>
+<a class="font-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">FAN VIEW</a>
+<a class="font-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">STAFF APP</a>
+</nav>
+<div class="flex items-center gap-4 font-data-mono text-xs">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-primary uppercase font-medium">Live Match Mode</span>
+</div>
+<span class="text-outline">WC26-SF-04 | LUSAIL STADIUM</span>
+</div>
+</header>
+<!-- Main Layout -->
+<main class="flex-1 mt-[52px] flex overflow-hidden">
+<!-- Left Column: GATES -->
+<aside class="w-[260px] border-r border-outline-variant flex flex-col bg-surface-container-low overflow-y-auto">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<h2 class="font-headline-md text-sm uppercase tracking-wider text-primary">GATES (8)</h2>
+<span class="material-symbols-outlined text-outline text-sm">filter_list</span>
+</div>
+<div class="flex flex-col">
+<!-- Gate Cards -->
+<div class="p-4 border-b border-outline-variant bg-surface-container-highest cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 01</span>
+<span class="font-data-mono text-xs text-primary-container">↑ 12%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE A · NORTH PLAZA</div>
+<div class="font-data-mono text-primary text-lg font-semibold">04:12 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[45%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 02</span>
+<span class="font-data-mono text-xs text-tertiary-container">↓ 4%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE A · NORTH PLAZA</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">11:45 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container w-[72%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant bg-error-container/30 cursor-pointer hover:bg-error-container/50 transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 04</span>
+<span class="font-data-mono text-xs text-error font-medium">↑ 88%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE B · EAST WING</div>
+<div class="font-data-mono text-error text-lg font-bold">18:30 <span class="text-[10px] font-normal">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-error w-[94%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 03</span>
+<span class="font-data-mono text-xs text-outline">--</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE B · EAST WING</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">02:05 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[15%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 05</span>
+<span class="font-data-mono text-xs text-primary-container">↑ 5%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE C · SOUTH BANK</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">05:40 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[38%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 07</span>
+<span class="font-data-mono text-xs text-error">↑ 42%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE C · SOUTH BANK</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">14:15 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container w-[81%]"></div>
+</div>
+</div>
+<div class="p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-headline-md text-sm text-on-surface">GATE 06</span>
+<span class="font-data-mono text-xs text-primary-container">↓ 2%</span>
+</div>
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase tracking-tighter">ZONE D · WEST PLAZA</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">03:50 <span class="text-[10px] font-normal text-outline">MIN</span></div>
+<div class="w-full h-1 bg-surface-variant mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[30%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Center Column: HEATMAP -->
+<section class="flex-1 flex flex-col min-w-0 bg-surface">
+<div class="p-4 border-b border-outline-variant bg-surface-container-highest">
+<h2 class="font-headline-md text-sm uppercase tracking-widest text-primary">Lusail Iconic Stadium · Matchday Heatmap</h2>
+</div>
+<div class="flex-1 relative flex items-center justify-center p-8 overflow-hidden">
+<svg class="w-full max-w-[800px] h-auto drop-shadow-md" viewbox="0 0 800 400">
+<!-- Pitch -->
+<rect class="mask-stadium opacity-20" fill="none" height="100" stroke="#00687a" stroke-width="2" width="200" x="300" y="150"></rect>
+<circle class="mask-stadium opacity-20" cx="400" cy="200" fill="none" r="30" stroke="#00687a" stroke-width="2"></circle>
+<!-- Stadium Outer Ring -->
+<ellipse class="mask-stadium" cx="400" cy="200" fill="none" rx="350" ry="180" stroke="#bcc9cd" stroke-dasharray="12 8" stroke-width="2"></ellipse>
+<!-- Gate Nodes -->
+<!-- Gate 1 North -->
+<circle cx="400" cy="20" fill="#06b6d4" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" text-anchor="middle" x="400" y="12">G1</text>
+<!-- Gate 2 NE -->
+<circle cx="650" cy="70" fill="#e89337" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" x="665" y="75">G2</text>
+<!-- Gate 4 East (Critical) -->
+<circle class="animate-pulse" cx="750" cy="200" fill="#ba1a1a" r="10"></circle>
+<text fill="#ba1a1a" font-family="Space Grotesk" font-size="10" font-weight="700" x="765" y="205">G4 ALERT</text>
+<!-- Gate 7 South (Critical) -->
+<circle class="animate-pulse" cx="400" cy="380" fill="#ba1a1a" r="10"></circle>
+<text fill="#ba1a1a" font-family="Space Grotesk" font-size="10" font-weight="700" text-anchor="middle" x="400" y="395">G7</text>
+<!-- Gate 5 SE -->
+<circle cx="650" cy="330" fill="#06b6d4" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" x="665" y="335">G5</text>
+<!-- Gate 6 SW -->
+<circle cx="150" cy="330" fill="#06b6d4" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" text-anchor="end" x="135" y="335">G6</text>
+<!-- Gate 8 West -->
+<circle cx="50" cy="200" fill="#06b6d4" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" text-anchor="end" x="35" y="205">G8</text>
+<!-- Gate 3 NW -->
+<circle cx="150" cy="70" fill="#06b6d4" r="8"></circle>
+<text fill="#171d1e" font-family="Space Grotesk" font-size="10" font-weight="600" text-anchor="end" x="135" y="75">G3</text>
+</svg>
+<!-- Incident Overlay -->
+<div class="absolute bottom-6 left-6 right-6">
+<div class="bg-surface-container-lowest border border-outline-variant p-4 shadow-lg rounded-DEFAULT">
+<div class="flex items-center gap-1 mb-4">
+<span class="material-symbols-outlined text-error text-sm">warning</span>
+<h3 class="font-headline-md text-xs tracking-[0.2em] text-error uppercase font-bold">Tournament Alerts</h3>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-error-container/20 border border-error-container p-2 flex items-center justify-between rounded-DEFAULT border-l-4 border-l-error">
+<div>
+<div class="font-headline-md text-xs uppercase font-semibold text-on-surface">Sensor Fault - Gate 04</div>
+<div class="text-[10px] text-on-surface-variant">Scanner 042 latency high</div>
+</div>
+<span class="font-data-mono text-[10px] text-error font-medium">03:42 ago</span>
+</div>
+<div class="bg-error-container/20 border border-error-container p-2 flex items-center justify-between rounded-DEFAULT border-l-4 border-l-error">
+<div>
+<div class="font-headline-md text-xs uppercase font-semibold text-on-surface">Density Warning - Gate 07</div>
+<div class="text-[10px] text-on-surface-variant">Zone C overflow predicted</div>
+</div>
+<span class="font-data-mono text-[10px] text-error font-medium">01:12 ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: DETAILS -->
+<aside class="w-[280px] border-l border-outline-variant flex flex-col bg-surface-container-low overflow-y-auto">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<h2 class="font-headline-md text-sm uppercase tracking-wider text-primary">GATE 04 DETAILS</h2>
+<span class="px-2 py-[2px] bg-error text-on-error font-label-caps text-[10px] rounded-[2px]">CRITICAL</span>
+</div>
+<div class="p-4 space-y-6">
+<!-- Metrics Grid -->
+<div class="grid grid-cols-2 gap-[1px] bg-outline-variant border border-outline-variant rounded-DEFAULT overflow-hidden">
+<div class="bg-surface-container-lowest p-3">
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase font-semibold">Wait Time</div>
+<div class="font-data-mono text-error text-lg font-bold">18<span class="text-sm font-normal">m</span> 30<span class="text-sm font-normal">s</span></div>
+</div>
+<div class="bg-surface-container-lowest p-3">
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase font-semibold">Queue Count</div>
+<div class="font-data-mono text-error text-lg font-bold">1,240</div>
+</div>
+<div class="bg-surface-container-lowest p-3">
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase font-semibold">Flow Rate</div>
+<div class="font-data-mono text-on-surface text-lg font-semibold">42<span class="text-xs font-normal text-outline">/min</span></div>
+</div>
+<div class="bg-surface-container-lowest p-3">
+<div class="text-[10px] text-on-surface-variant mb-1 uppercase font-semibold">Systems</div>
+<div class="font-data-mono text-primary-container text-sm font-bold flex items-center gap-1 mt-1">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                                ACTIVE
+                            </div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-2 gap-2">
+<button class="border border-primary text-primary font-label-caps text-[11px] py-3 rounded-DEFAULT hover:bg-primary hover:text-on-primary transition-all active:scale-95 uppercase font-bold">Unlock Gate</button>
+<button class="bg-error text-on-error font-label-caps text-[11px] py-3 rounded-DEFAULT hover:bg-red-700 transition-all active:scale-95 uppercase font-bold">Emergency</button>
+<button class="border border-outline text-on-surface font-label-caps text-[11px] py-3 rounded-DEFAULT hover:bg-surface-variant transition-all active:scale-95 uppercase font-bold">Deploy Staff</button>
+<button class="border border-primary text-primary font-label-caps text-[11px] py-3 rounded-DEFAULT hover:bg-primary hover:text-on-primary transition-all active:scale-95 uppercase font-bold">Push Nudge</button>
+</div>
+<!-- System Health -->
+<div class="space-y-4">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<h3 class="font-label-caps text-[10px] text-on-surface-variant tracking-[0.15em] uppercase font-bold">Operations Health</h3>
+<span class="material-symbols-outlined text-outline text-xs">analytics</span>
+</div>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-[10px] font-data-mono mb-1">
+<span class="text-on-surface uppercase font-semibold">Core Engine</span>
+<span class="text-primary-container font-bold">99.8%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[99.8%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[10px] font-data-mono mb-1">
+<span class="text-on-surface uppercase font-semibold">Crowd Prediction</span>
+<span class="text-tertiary-container font-bold">84.2%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container w-[84.2%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[10px] font-data-mono mb-1">
+<span class="text-on-surface uppercase font-semibold">Network Latency</span>
+<span class="text-primary-container font-bold">12ms</span>
+</div>
+<div class="w-full h-[4px] bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[12%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-2">
+<div class="bg-surface-container-highest border border-outline-variant p-3 rounded-DEFAULT">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-base">verified</span>
+<span class="font-headline-md text-xs text-on-surface uppercase tracking-tighter font-bold">Commissioner's Brief</span>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed">Gate 04 hardware sync in progress. Expected throughput normalization prior to Match Half-Time.</p>
+</div>
+</div>
+</div>
+</aside>
+</main>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+        // Simulate real-time updates for that premium "live" feel
+        setInterval(() => {
+            const timeLabels = document.querySelectorAll('.font-data-mono.text-lg');
+            timeLabels.forEach(label => {
+                if(Math.random() > 0.9) {
+                    label.classList.add('transition-opacity', 'duration-100');
+                    label.style.opacity = '0.5';
+                    setTimeout(() => label.style.opacity = '1', 150);
+                }
+            });
+        }, 4000);
+    </script>
+</body></html>
