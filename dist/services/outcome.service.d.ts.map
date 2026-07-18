@@ -1,0 +1,1 @@
+{"version":3,"file":"outcome.service.d.ts","sourceRoot":"","sources":["../../src/services/outcome.service.ts"],"names":[],"mappings":"AAMA,OAAO,EAAE,YAAY,EAAE,MAAM,UAAU,CAAC;AAWxC,qBAAa,cAAc;IACzB;;OAEG;WACU,eAAe,CAAC,SAAS,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC,YAAY,CAAC;IAsCvE;;OAEG;WACU,mBAAmB,CAAC,OAAO,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC,GAAG,CAAC;CAajE"}
