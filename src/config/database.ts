@@ -2,7 +2,7 @@
 // PostgreSQL Connection Pool
 // ============================================================================
 
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, PoolConfig } from 'pg';
 import { env } from './env';
 import { logger } from '../middleware/logging';
 
@@ -218,13 +218,24 @@ function simulateQuery(text: string, params: any[] = []): { rows: any[]; rowCoun
 
 export async function initializeDatabase(): Promise<void> {
   try {
+    const poolConfig: PoolConfig = env.DATABASE_URL
+      ? { connectionString: env.DATABASE_URL }
+      : {
+          host: env.DB_HOST,
+          port: env.DB_PORT,
+          database: env.DB_NAME,
+          user: env.DB_USER,
+          password: env.DB_PASSWORD,
+        };
+
+    // Most hosted PostgreSQL services require TLS. Keep certificate
+    // verification relaxed for compatibility with provider-issued URLs.
+    if (env.DB_SSL) {
+      poolConfig.ssl = { rejectUnauthorized: false };
+    }
+
     pool = new Pool({
-      host: env.DB_HOST,
-      port: env.DB_PORT,
-      database: env.DB_NAME,
-      user: env.DB_USER,
-      password: env.DB_PASSWORD,
-      ssl: env.DB_SSL ? { rejectUnauthorized: false } : false,
+      ...poolConfig,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
@@ -281,4 +292,3 @@ export const db = {
     return Promise.resolve();
   },
 };
-
