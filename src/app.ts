@@ -13,7 +13,7 @@ import fansRoutes from './routes/fans';
 import opsRoutes from './routes/ops';
 import gatesRoutes from './routes/gates';
 import healthRoutes from './routes/health';
-
+import { createRateLimiter } from './middleware/rate-limit';
 import hpp from 'hpp';
 
 export function createApp(): Express {
@@ -29,10 +29,10 @@ export function createApp(): Express {
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts if needed, though we moved to external
-          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-          fontSrc: ["'self'", "https://fonts.gstatic.com"],
-          imgSrc: ["'self'", "data:"],
-          connectSrc: ["'self'", "ws:", "wss:"], // Allow websockets
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          imgSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'", 'ws:', 'wss:'], // Allow websockets
         },
       },
       crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -56,10 +56,10 @@ export function createApp(): Express {
 
   app.use(express.json({ limit: '100kb' }));
   app.use(express.urlencoded({ limit: '100kb', extended: true }));
-  
+
   if (process.env.NODE_ENV !== 'test') {
     app.use(requestLogger);
-    app.use(require('./middleware/rate-limit').createRateLimiter());
+    app.use(createRateLimiter());
   }
 
   // ====================================================================

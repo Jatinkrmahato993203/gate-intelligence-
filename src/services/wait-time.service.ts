@@ -32,9 +32,9 @@ export class WaitTimeService {
 
     const waitTimes: { [key: string]: WaitTimeResult } = {};
 
-    const gateIds = result.rows.map((row: any) => row.gate_id);
+    const gateIds = (result.rows as { gate_id: string }[]).map((row) => row.gate_id);
     const calculations = await Promise.all(
-      gateIds.map((gateId: string) => this.calculateWaitForGate(gateId))
+      gateIds.map((gateId: string) => this.calculateWaitForGate(gateId)),
     );
 
     gateIds.forEach((gateId: string, index: number) => {
@@ -85,9 +85,16 @@ export class WaitTimeService {
         [gateId],
       );
 
-      const observations: QueueObservation[] = queueResult.rows.map((r: any) => ({
+      const observations: QueueObservation[] = (
+        queueResult.rows as {
+          observed_queue_count: number;
+          observation_source: string;
+          confidence: string;
+          created_at: string | Date;
+        }[]
+      ).map((r) => ({
         observed_queue_count: r.observed_queue_count,
-        observation_source: r.observation_source,
+        observation_source: r.observation_source as 'sensor' | 'cctv' | 'manual' | 'extrapolated',
         confidence: parseFloat(r.confidence),
         timestamp: new Date(r.created_at),
       }));

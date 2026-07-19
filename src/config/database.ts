@@ -152,11 +152,11 @@ mockGates.forEach((g) => {
   });
 });
 
-const mockNudges: any[] = [];
-const mockConfirmations: any[] = [];
-const mockFeedback: any[] = [];
-const mockOpsActions: any[] = [];
-const mockWaitEstimates: any[] = [];
+const mockNudges: Record<string, unknown>[] = [];
+const mockConfirmations: Record<string, unknown>[] = [];
+const mockFeedback: Record<string, unknown>[] = [];
+const mockOpsActions: Record<string, unknown>[] = [];
+const mockWaitEstimates: Record<string, unknown>[] = [];
 
 // Periodically update queue counts randomly to simulate active sensor data stream
 setInterval(() => {
@@ -176,7 +176,10 @@ setInterval(() => {
   });
 }, 10000);
 
-function simulateQuery(text: string, params: any[] = []): { rows: any[]; rowCount: number } {
+function simulateQuery(
+  text: string,
+  params: unknown[] = [],
+): { rows: Record<string, unknown>[]; rowCount: number } {
   const normText = text.replace(/\s+/g, ' ').trim();
 
   // SELECT NOW()
@@ -200,7 +203,7 @@ function simulateQuery(text: string, params: any[] = []): { rows: any[]; rowCoun
 
   // SELECT observed_queue_count... FROM queue_observations WHERE gate_id = $1 ORDER BY created_at DESC LIMIT 10
   if (normText.includes('FROM queue_observations WHERE gate_id = $1')) {
-    const obs = mockQueueObservations[params[0]] || [];
+    const obs = mockQueueObservations[params[0] as string] || [];
     return { rows: obs.slice(0, 10), rowCount: Math.min(obs.length, 10) };
   }
 
@@ -382,7 +385,7 @@ export async function initializeDatabase(): Promise<void> {
     await client.query('SELECT NOW()');
     client.release();
     logger.info('✓ Connected to PostgreSQL');
-  } catch (error) {
+  } catch {
     logger.warn(
       'PostgreSQL database connection failed — falling back to in-memory Mock Database mode',
     );
@@ -391,7 +394,7 @@ export async function initializeDatabase(): Promise<void> {
 }
 
 export const db = {
-  query: (text: string, params?: any[]) => {
+  query: (text: string, params?: unknown[]) => {
     if (useMockDb) {
       return Promise.resolve(simulateQuery(text, params));
     }
@@ -402,7 +405,7 @@ export const db = {
   transaction: async <T>(callback: (client: PoolClient) => Promise<T>): Promise<T> => {
     if (useMockDb) {
       const mockClient = {
-        query: (text: string, params?: any[]) => Promise.resolve(simulateQuery(text, params)),
+        query: (text: string, params?: unknown[]) => Promise.resolve(simulateQuery(text, params)),
       } as unknown as PoolClient;
       return callback(mockClient);
     }
@@ -413,9 +416,9 @@ export const db = {
       const result = await callback(client);
       await client.query('COMMIT');
       return result;
-    } catch (error) {
+    } catch (_error) {
       await client.query('ROLLBACK');
-      throw error;
+      throw _error;
     } finally {
       client.release();
     }

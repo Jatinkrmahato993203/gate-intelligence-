@@ -1,5 +1,5 @@
 import { calculateWaitTime } from '../../../src/lib/wait-time-calculation';
-import { QueueObservation } from '../../../src/types';
+import { QueueObservation, ArrivalForecast } from '../../../src/types';
 
 describe('WaitTimeCalculation', () => {
   describe('calculateWaitTime', () => {
@@ -9,17 +9,17 @@ describe('WaitTimeCalculation', () => {
         max_queue_length: 500,
         processing_time_sec: 10,
         crowd_slowdown_factor: 1.0,
-        queue_history: [] as QueueObservation[]
+        queue_history: [] as QueueObservation[],
       };
 
       const forecast = {
         time_window: '15m',
         predicted_arrivals: 0,
         confidence: 1,
-        factors: []
+        factors: [],
       };
 
-      const waitTime = calculateWaitTime(gate, forecast as any);
+      const waitTime = calculateWaitTime(gate, forecast as unknown as ArrivalForecast);
       expect(waitTime.estimated_wait_min).toBe(0);
     });
 
@@ -29,23 +29,25 @@ describe('WaitTimeCalculation', () => {
         max_queue_length: 500,
         processing_time_sec: 10,
         crowd_slowdown_factor: 1.0,
-        queue_history: [{
-          observed_queue_count: 100,
-          observation_source: 'sensor',
-          confidence: 0.9,
-          timestamp: new Date()
-        } as QueueObservation]
+        queue_history: [
+          {
+            observed_queue_count: 100,
+            observation_source: 'sensor',
+            confidence: 0.9,
+            timestamp: new Date(),
+          } as QueueObservation,
+        ],
       };
 
       const forecast = {
         time_window: '15m',
         predicted_arrivals: 0,
         confidence: 1,
-        factors: []
+        factors: [],
       };
 
       // 100 people in queue / 50 throughput = 2 minutes
-      const waitTime = calculateWaitTime(gate, forecast as any);
+      const waitTime = calculateWaitTime(gate, forecast as unknown as ArrivalForecast);
       expect(waitTime.estimated_wait_min).toBeGreaterThan(1);
     });
   });

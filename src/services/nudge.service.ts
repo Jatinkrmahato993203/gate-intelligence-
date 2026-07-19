@@ -25,7 +25,9 @@ export class NudgeService {
          FROM gates WHERE is_active = true`,
       );
 
-      const currentGateInfo = allGates.rows.find((g: any) => g.gate_id === currentGateId);
+      const currentGateInfo = (allGates.rows as { gate_id: string; venue_id: string }[]).find(
+        (g) => g.gate_id === currentGateId,
+      );
       if (!currentGateInfo) {
         return { error: 'Invalid current gate ID' };
       }
@@ -33,8 +35,16 @@ export class NudgeService {
       const venueId = currentGateInfo.venue_id;
 
       // Find gates within 500m of the user
-      const nearbyGates = allGates.rows
-        .map((gate: any) => ({
+      const nearbyGates = (
+        allGates.rows as {
+          gate_id: string;
+          location_lat: number;
+          location_lng: number;
+          zone: string;
+          status: string;
+        }[]
+      )
+        .map((gate) => ({
           gate_id: gate.gate_id as string,
           distance_m: haversineDistance(userLat, userLng, gate.location_lat, gate.location_lng),
         }))

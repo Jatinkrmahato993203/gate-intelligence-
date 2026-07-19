@@ -60,7 +60,7 @@ export class OutcomeService {
   /**
    * Get conversion funnel data.
    */
-  static async getConversionFunnel(eventId?: string): Promise<any> {
+  static async getConversionFunnel(eventId?: string): Promise<unknown> {
     try {
       const query = eventId
         ? `SELECT * FROM conversion_funnel WHERE event_id = $1`
