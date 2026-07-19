@@ -16,14 +16,21 @@ export class NudgeService {
     userId: string,
     currentGateId: string,
     userLat: number,
-    userLng: number
+    userLng: number,
   ): Promise<NudgeRecord | { error: string }> {
     try {
       // Get all active gates with coordinates
       const allGates = await db.query(
-        `SELECT gate_id, location_lat, location_lng
-         FROM gates WHERE is_active = true`
+        `SELECT gate_id, venue_id, location_lat, location_lng
+         FROM gates WHERE is_active = true`,
       );
+
+      const currentGateInfo = allGates.rows.find((g: any) => g.gate_id === currentGateId);
+      if (!currentGateInfo) {
+        return { error: 'Invalid current gate ID' };
+      }
+
+      const venueId = currentGateInfo.venue_id;
 
       // Find gates within 500m of the user
       const nearbyGates = allGates.rows
@@ -38,18 +45,26 @@ export class NudgeService {
         return { error: 'No nearby alternative gates' };
       }
 
-      // Calculate wait times
-      const currentWait = await WaitTimeService.calculateWaitForGate(currentGateId);
+      // Fetch all wait times for the venue efficiently (hits cache if available)
+      const waitTimesCache = await WaitTimeService.getAllWaitTimes(venueId);
+      const currentWait = waitTimesCache[currentGateId];
 
-      // Find the best alternative
-      let bestAlternative: { gate_id: string; wait_min: number; confidence: number } | null = null;
+      if (!currentWait) {
+        return { error: 'Current gate wait time unavailable' };
+      }
+
+      // Find the best alternative using O(1) dictionary lookups
+      let bestAlternative: {
+        gate_id: string;
+        wait_min: number;
+        confidence: number;
+      } | null = null;
 
       for (const gate of nearbyGates) {
-        const wait = await WaitTimeService.calculateWaitForGate(gate.gate_id);
-        if (
-          !bestAlternative ||
-          wait.estimated_wait_min < bestAlternative.wait_min
-        ) {
+        const wait = waitTimesCache[gate.gate_id];
+        if (!wait) continue;
+
+        if (!bestAlternative || wait.estimated_wait_min < bestAlternative.wait_min) {
           bestAlternative = {
             gate_id: gate.gate_id,
             wait_min: wait.estimated_wait_min,
@@ -85,7 +100,7 @@ export class NudgeService {
           bestAlternative.wait_min,
           timeSaved,
           bestAlternative.confidence,
-        ]
+        ],
       );
 
       return result.rows[0] as NudgeRecord;

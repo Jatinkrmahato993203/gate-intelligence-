@@ -25,6 +25,8 @@ export interface EnvConfig {
   ENABLE_GEMINI_FORECASTING: boolean;
   ENABLE_WEBSOCKET: boolean;
   ENABLE_SCHEDULED_JOBS: boolean;
+  API_KEY: string;
+  JWT_SECRET: string;
 }
 
 function getEnvString(key: string, fallback: string): string {
@@ -68,6 +70,8 @@ export function loadEnv(): EnvConfig {
     ENABLE_GEMINI_FORECASTING: getEnvBool('ENABLE_GEMINI_FORECASTING', true),
     ENABLE_WEBSOCKET: getEnvBool('ENABLE_WEBSOCKET', true),
     ENABLE_SCHEDULED_JOBS: getEnvBool('ENABLE_SCHEDULED_JOBS', true),
+    API_KEY: getEnvString('API_KEY', 'default-dev-ops-key'),
+    JWT_SECRET: getEnvString('JWT_SECRET', 'default-dev-jwt-secret'),
   };
 }
 

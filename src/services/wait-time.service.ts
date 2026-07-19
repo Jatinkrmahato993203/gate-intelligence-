@@ -11,6 +11,7 @@ import { QueueObservation, WaitTimeResult } from '../types';
 const CACHE_TTL_SEC = 10; // Cache wait times for 10 seconds
 
 export class WaitTimeService {
+  private static cachedEventStart: { time: Date; expiresAt: number } | null = null;
   /**
    * Get all wait times for a venue (with Redis caching).
    */
@@ -26,14 +27,19 @@ export class WaitTimeService {
 
     const result = await db.query(
       `SELECT gate_id FROM gates WHERE venue_id = $1 AND is_active = true`,
-      [venueId]
+      [venueId],
     );
 
     const waitTimes: { [key: string]: WaitTimeResult } = {};
 
-    for (const row of result.rows) {
-      waitTimes[row.gate_id] = await this.calculateWaitForGate(row.gate_id);
-    }
+    const gateIds = result.rows.map((row: any) => row.gate_id);
+    const calculations = await Promise.all(
+      gateIds.map((gateId: string) => this.calculateWaitForGate(gateId))
+    );
+
+    gateIds.forEach((gateId: string, index: number) => {
+      waitTimes[gateId] = calculations[index];
+    });
 
     // Store in cache
     try {
@@ -54,7 +60,7 @@ export class WaitTimeService {
         `SELECT gate_id, throughput_per_min, processing_time_sec,
                 max_queue_length, crowd_slowdown_factor
          FROM gates WHERE gate_id = $1`,
-        [gateId]
+        [gateId],
       );
 
       if (!gateResult.rows.length) {
@@ -76,7 +82,7 @@ export class WaitTimeService {
          WHERE gate_id = $1
          ORDER BY created_at DESC
          LIMIT 10`,
-        [gateId]
+        [gateId],
       );
 
       const observations: QueueObservation[] = queueResult.rows.map((r: any) => ({
@@ -102,16 +108,18 @@ export class WaitTimeService {
       const waitResult = calculateWaitTime(gate, forecast);
 
       // Persist estimate for history
-      await db.query(
-        `INSERT INTO wait_time_estimates (gate_id, estimated_wait_min, queue_count, confidence, created_at)
+      await db
+        .query(
+          `INSERT INTO wait_time_estimates (gate_id, estimated_wait_min, queue_count, confidence, created_at)
          VALUES ($1, $2, $3, $4, NOW())`,
-        [
-          gateId,
-          waitResult.estimated_wait_min,
-          observations[0]?.observed_queue_count || 0,
-          waitResult.confidence,
-        ]
-      ).catch((err) => logger.warn({ err, gateId }, 'Failed to persist wait time estimate'));
+          [
+            gateId,
+            waitResult.estimated_wait_min,
+            observations[0]?.observed_queue_count || 0,
+            waitResult.confidence,
+          ],
+        )
+        .catch((err) => logger.warn({ err, gateId }, 'Failed to persist wait time estimate'));
 
       return waitResult;
     } catch (error) {
@@ -130,16 +138,28 @@ export class WaitTimeService {
    * Get arrival forecast — rule-based (Gemini extension point).
    */
   private static async getArrivalForecast(_gateId: string) {
-    // Get next event start time
-    const eventResult = await db.query(
-      `SELECT scheduled_start FROM events
-       WHERE scheduled_start > NOW()
-       ORDER BY scheduled_start LIMIT 1`
-    );
+    let eventStartTime: Date;
 
-    const eventStartTime = eventResult.rows.length
-      ? new Date(eventResult.rows[0].scheduled_start)
-      : new Date(Date.now() + 60 * 60000); // Default: 1 hour from now
+    if (this.cachedEventStart && this.cachedEventStart.expiresAt > Date.now()) {
+      eventStartTime = this.cachedEventStart.time;
+    } else {
+      // Get next event start time
+      const eventResult = await db.query(
+        `SELECT scheduled_start FROM events
+         WHERE scheduled_start > NOW()
+         ORDER BY scheduled_start LIMIT 1`,
+      );
+
+      eventStartTime = eventResult.rows.length
+        ? new Date(eventResult.rows[0].scheduled_start)
+        : new Date(Date.now() + 60 * 60000); // Default: 1 hour from now
+
+      // Cache the event start time for 1 minute
+      this.cachedEventStart = {
+        time: eventStartTime,
+        expiresAt: Date.now() + 60000,
+      };
+    }
 
     return predictArrivalsRuleBased(new Date(), eventStartTime, []);
   }
