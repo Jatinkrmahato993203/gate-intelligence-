@@ -20,7 +20,7 @@ export function startForecastCalibrateJob(): void {
         GROUP BY c.confirmed_gate_id
       `);
 
-      result.rows.forEach((row: any) => {
+      result.rows.forEach((row: { gate_id: string; mape_pct: string }) => {
         logger.info({ gate: row.gate_id, mape: row.mape_pct }, 'Gate accuracy');
         if (parseFloat(row.mape_pct) > 20) {
           logger.warn(

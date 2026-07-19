@@ -122,11 +122,11 @@ export interface DailyMetrics {
 
 export interface WSMessage {
   type: string;
-  payload?: any;
+  payload?: unknown;
 }
 
 export interface WSBroadcast {
   type: string;
-  data: any;
+  data: unknown;
   timestamp: string;
 }

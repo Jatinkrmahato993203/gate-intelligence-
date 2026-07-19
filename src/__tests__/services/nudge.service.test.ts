@@ -5,7 +5,7 @@ describe('Geo Library', () => {
     it('should correctly calculate distance between two points', () => {
       // New York to London approx
       const nyLat = 40.7128;
-      const nyLng = -74.0060;
+      const nyLng = -74.006;
       const lonLat = 51.5074;
       const lonLng = -0.1278;
 

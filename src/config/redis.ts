@@ -28,8 +28,8 @@ export async function initializeRedis(): Promise<void> {
     redisClient.on('connect', () => logger.info('Redis connected'));
 
     await redisClient.connect();
-  } catch (error) {
-    logger.warn('Redis connection failed — falling back to in-memory Mock Redis mode');
+  } catch {
+    logger.warn('Redis failed to connect. Running in degraded mode (in-memory mock).');
     useMockRedis = true;
   }
 }

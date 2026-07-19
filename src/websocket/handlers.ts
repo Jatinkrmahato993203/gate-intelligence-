@@ -68,7 +68,7 @@ export function broadcastWaitTimes(waitTimes: { [gateId: string]: WaitTimeResult
   }
 }
 
-export function broadcastEvent(eventType: string, payload: any): void {
+export function broadcastEvent(eventType: string, payload: unknown): void {
   const message = JSON.stringify({
     type: eventType,
     data: payload,

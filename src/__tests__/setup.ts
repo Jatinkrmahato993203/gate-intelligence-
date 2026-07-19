@@ -1,6 +1,8 @@
+import { NextFunction } from 'express';
+
 // Mock the Pino Logger so it doesn't clutter our test output
 jest.mock('../middleware/logging', () => ({
-  requestLogger: (_req: any, _res: any, next: any) => next(),
+  requestLogger: (_req: unknown, _res: unknown, next: NextFunction) => next(),
   logger: {
     info: jest.fn(),
     error: jest.fn(),
@@ -37,7 +39,7 @@ jest.mock('../config/redis', () => ({
 
 // Mock Rate Limiter to just pass through
 jest.mock('../middleware/rate-limit', () => ({
-  createRateLimiter: () => (_req: any, _res: any, next: any) => next(),
+  createRateLimiter: () => (_req: unknown, _res: unknown, next: NextFunction) => next(),
 }));
 
 // Mock Gemini

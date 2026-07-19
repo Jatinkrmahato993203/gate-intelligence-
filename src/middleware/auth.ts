@@ -42,9 +42,9 @@ export function validateAuth(req: Request, res: Response, next: NextFunction): v
       // Verify JWT token signature
       const decoded = jwt.verify(token, env.JWT_SECRET || '');
       // Can attach decoded token to req.user here if needed
-      (req as any).user = decoded;
+      (req as Request & { user?: unknown }).user = decoded;
       return next();
-    } catch (err) {
+    } catch {
       res.status(401).json({ error: 'Unauthorized — invalid or expired token' });
       return;
     }

@@ -49,14 +49,14 @@ router.get(
   '/nudge',
   validate(nudgeSchema, 'query'),
   asyncHandler(async (req: Request, res: Response) => {
-    const { user_id, current_gate_id, lat, lng } = req.query as any;
+    const { user_id, current_gate_id, lat, lng } = req.query as unknown as {
+      user_id: string;
+      current_gate_id: string;
+      lat: number;
+      lng: number;
+    };
 
-    const nudge = await NudgeService.generateNudge(
-      user_id,
-      current_gate_id,
-      lat,
-      lng,
-    );
+    const nudge = await NudgeService.generateNudge(user_id, current_gate_id, lat, lng);
 
     res.json(nudge);
   }),
