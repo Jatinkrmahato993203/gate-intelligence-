@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate Intelligence Engine — System Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060b17;--s1:#0c1424;--s2:#111b30;--s3:#1a2640;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);--bd3:rgba(255,255,255,.2);
+  --t1:#e8edf5;--t2:#8899bb;--t3:#4d607a;
+  --purple:#8b7de8;--purple-bg:rgba(139,125,232,.1);--purple-br:rgba(139,125,232,.25);
+  --teal:#00d4aa;--teal-bg:rgba(0,212,170,.1);--teal-br:rgba(0,212,170,.25);
+  --blue:#4a9eff;--blue-bg:rgba(74,158,255,.1);--blue-br:rgba(74,158,255,.25);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,.1);--amber-br:rgba(245,166,35,.25);
+  --green:#22d35e;--green-bg:rgba(34,211,94,.1);--green-br:rgba(34,211,94,.25);
+  --pink:#ff6b9d;--pink-bg:rgba(255,107,157,.1);--pink-br:rgba(255,107,157,.25);
+  --red:#ff4d6d;--red-bg:rgba(255,77,109,.1);--red-br:rgba(255,77,109,.25);
+  --r:8px;
+}
+
+body{
+  background:var(--bg);
+  color:var(--t1);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:13px;
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 10% 10%,rgba(139,125,232,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 85%,rgba(0,212,170,.05) 0%,transparent 60%),
+    url("data:image/svg+xml,%3Csvg width='28' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='.5' fill='rgba(255,255,255,0.035)'/%3E%3C/svg%3E");
+}
+
+/* ── ANIMATIONS ─────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(16px) scale(.95)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(34,211,94,0)}50%{box-shadow:0 0 12px 2px rgba(34,211,94,.25)}}
+
+/* ── HEADER ─────────────────────────────────────────────────── */
+.header{
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;
+  background:rgba(6,11,23,.88);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  z-index:100;
+}
+.header-hero{
+  padding:18px 28px 14px;
+  display:flex;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--bd);
+}
+.header-hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(139,125,232,.12) 0%,rgba(0,212,170,.06) 50%,rgba(74,158,255,.08) 100%);
+  pointer-events:none;
+}
+.header-hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(139,125,232,.06) 50%,transparent 100%);
+  background-size:200% 100%;
+  animation:shimmer 8s ease infinite;
+  pointer-events:none;
+}
+.logo{
+  width:40px;height:40px;
+  background:linear-gradient(135deg,var(--purple),var(--teal));
+  border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(139,125,232,.35),inset 0 1px 0 rgba(255,255,255,.15);
+  position:relative;z-index:1;
+}
+.header-info{flex:1;min-width:0;position:relative;z-index:1}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-.015em}
+.header-sub{font-size:10.5px;color:var(--t3);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.header-badges{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;position:relative;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br);animation:glow 3s ease infinite}
+.badge-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-br)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+
+/* ── SEARCH BUTTON ──────────────────────────────────────────── */
+.search-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:6px;
+  background:rgba(255,255,255,.04);border:1px solid var(--bd);
+  color:var(--t3);font-size:11px;cursor:pointer;
+  transition:all .18s;font-family:'Inter',sans-serif;
+  position:relative;z-index:1;
+}
+.search-btn:hover{border-color:var(--bd2);color:var(--t2);background:rgba(255,255,255,.07)}
+.search-btn kbd{
+  background:var(--s2);border:1px solid var(--bd2);
+  padding:1px 5px;border-radius:3px;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t3);
+}
+
+/* ── TABS ────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  padding:10px 16px;font-size:12px;font-weight:500;
+  color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .18s,border-color .18s;
+  white-space:nowrap;user-select:none;
+}
+.tab:hover{color:var(--t2)}
+.tab.active{color:var(--t1);border-bottom-color:var(--teal)}
+.tab-badge{
+  display:inline-block;
+  background:var(--s2);border:1px solid var(--bd);
+  color:var(--t3);font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:8px;margin-left:5px;vertical-align:middle;
+  transition:all .18s;
+}
+.tab.active .tab-badge{background:var(--teal-bg);border-color:var(--teal-br);color:var(--teal)}
+
+/* ── CONTENT ─────────────────────────────────────────────────── */
+.content{padding:24px 28px;max-width:1280px;margin:0 auto}
+.section{display:none}
+.section.active{display:block;animation:fadeUp .22s ease}
+
+/* ── INFO ROW ────────────────────────────────────────────────── */
+.info-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.info-pill{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:20px;padding:4px 12px;font-size:11px;color:var(--t2);
+  transition:border-color .15s;
+}
+.info-pill:hover{border-color:var(--bd2)}
+.info-pill b{color:var(--t1);font-weight:600}
+.arr{color:var(--t3);font-size:11px;padding:0 2px}
+
+/* ── CHIPS ───────────────────────────────────────────────────── */
+.chip{
+  display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;
+  font-size:11px;font-weight:500;font-family:'JetBrains Mono',monospace;white-space:nowrap;
+  transition:transform .12s,box-shadow .12s;cursor:default;
+}
+.chip:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.chip-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-br)}
+.chip-teal{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-br)}
+.chip-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-br)}
+.chip-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-br)}
+.chip-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br)}
+.chip-gray{background:rgba(255,255,255,.05);color:var(--t2);border:1px solid var(--bd)}
+.chip-pink{background:var(--pink-bg);color:var(--pink);border:1px solid var(--pink-br)}
+.chip-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
+
+/* ── ARCHITECTURE ────────────────────────────────────────────── */
+.arch-grid{display:grid;grid-template-columns:240px 1fr;gap:18px}
+.layer-stack{display:flex;flex-direction:column;gap:6px}
+.layer{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  padding:10px 13px;position:relative;overflow:hidden;
+  transition:border-color .15s,transform .18s,box-shadow .18s;
+}
+.layer:hover{border-color:var(--bd2);transform:translateX(3px);box-shadow:0 2px 14px rgba(0,0,0,.25)}
+.layer::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.lp::before{background:var(--purple)}.lt::before{background:var(--teal)}.lb::before{background:var(--blue)}.la::before{background:var(--amber)}.lg::before{background:var(--green)}
+.layer-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin-bottom:3px}
+.layer-name{font-size:12px;font-weight:600;color:var(--t1)}
+.layer-desc{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.45}
+.mini-arr{text-align:center;font-size:11px;color:var(--t3);line-height:1}
+
+.arch-right{display:flex;flex-direction:column;gap:14px}
+.flow-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  overflow:hidden;transition:border-color .15s,box-shadow .18s;
+}
+.flow-card:hover{border-color:var(--bd2);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.flow-head{
+  padding:9px 14px;background:var(--s2);border-bottom:1px solid var(--bd);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);
+}
+.flow-body{padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.flow-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+
+/* ── API ─────────────────────────────────────────────────────── */
+.route-group{margin-bottom:22px}
+.rg-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rg-prefix{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--t1)}
+.rg-count{font-size:10px;color:var(--t3);background:var(--s2);border:1px solid var(--bd);padding:2px 7px;border-radius:4px}
+.ep-list{display:flex;flex-direction:column;gap:4px}
+.ep{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  padding:10px 14px;display:grid;grid-template-columns:46px 1fr auto;
+  align-items:start;gap:10px;transition:border-color .15s,box-shadow .18s;
+}
+.ep:hover{border-color:var(--bd2);box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.method{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:3px 7px;border-radius:4px;text-align:center}
+.mget{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-br)}
+.mpost{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-br)}
+.ep-path{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--t1);
+  cursor:pointer;display:inline-block;transition:color .12s;user-select:none;
+}
+.ep-path:hover{color:var(--teal)}
+.ep-path::after{content:' ⎘';font-size:9px;opacity:0;transition:opacity .12s;color:var(--teal)}
+.ep-path:hover::after{opacity:1}
+.ep-desc{font-size:11px;color:var(--t3);margin-top:3px;line-height:1.5}
+.tag-auth{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-br);white-space:nowrap}
+.tag-pub{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-br);white-space:nowrap}
+
+/* ── DATABASE ────────────────────────────────────────────────── */
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.tbl{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  transition:border-color .15s,box-shadow .18s;
+}
+.tbl:hover{border-color:var(--bd2);box-shadow:0 2px 14px rgba(0,0,0,.22)}
+.tbl-head{padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;border-radius:calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0}
+.tbl-name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--t1)}
+.tbl-type{font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:3px;font-weight:700}
+.tt-base{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-br)}
+.tt-tx{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-br)}
+.tt-view{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-br)}
+.tt-ai{background:var(--pink-bg);color:var(--pink);border:1px solid var(--pink-br)}
+.tbl-cols{padding:5px 0}
+.col{display:flex;align-items:center;gap:7px;padding:3px 12px}
+.col-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.col-type{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);white-space:nowrap}
+.dot-pk{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.dot-col{width:7px;height:7px;border-radius:50%;background:var(--bd2);flex-shrink:0}
+.span2{grid-column:span 2}
+.view-cols{display:grid;grid-template-columns:1fr 1fr}
+.view-note{font-size:10px;color:var(--t3);padding:4px 12px 6px}
+
+/* FK tooltip wrapper */
+.fk-wrap{position:relative;display:inline-flex;align-items:center}
+.dot-fk{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;cursor:help}
+.fk-tip{
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:var(--s3);border:1px solid var(--bd3);color:var(--purple);
+  font-size:10px;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:4px;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
+}
+.fk-tip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--bd3);
+}
+.fk-wrap:hover .fk-tip{opacity:1}
+
+/* ── REALTIME ────────────────────────────────────────────────── */
+.ws-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.ws-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color .15s,box-shadow .18s}
+.ws-card:hover{border-color:var(--bd2);box-shadow:0 2px 14px rgba(0,0,0,.22)}
+.ws-head{padding:9px 14px;background:var(--s2);border-bottom:1px solid var(--bd)}
+.ws-title{font-size:12px;font-weight:600;color:var(--t1)}
+.ws-sub{font-size:10px;color:var(--t3);margin-top:1px;font-family:'JetBrains Mono',monospace}
+.ws-body{padding:12px 14px}
+.ev{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.ev:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.ev-type{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--teal);margin-bottom:3px}
+.ev-trigger{font-size:11px;color:var(--t3);margin-bottom:5px}
+.ev-payload{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);background:var(--s2);padding:6px 9px;border-radius:5px;border:1px solid var(--bd);line-height:1.55;word-break:break-all}
+
+/* ── JOBS ────────────────────────────────────────────────────── */
+.jobs-list{display:flex;flex-direction:column;gap:12px}
+.job{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color .15s,box-shadow .18s}
+.job:hover{box-shadow:0 2px 18px rgba(0,0,0,.25)}
+.job-summary{padding:16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;user-select:none}
+.job-summary-left{flex:1;min-width:0}
+.job-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.job-name{font-size:14px;font-weight:600;color:var(--t1)}
+.job-cron{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--amber-bg);color:var(--amber);padding:3px 9px;border-radius:4px;border:1px solid var(--amber-br)}
+.job-desc{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:10px}
+.job-tags{display:flex;flex-wrap:wrap;gap:5px}
+.jtag{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--s2);color:var(--t3);border:1px solid var(--bd);font-family:'JetBrains Mono',monospace}
+.job-expand-icon{font-size:18px;color:var(--t3);transition:transform .22s,color .15s;flex-shrink:0;margin-top:12px;line-height:1}
+.job-summary:hover .job-expand-icon{color:var(--t2)}
+.job-expand-icon.open{transform:rotate(180deg)}
+.job-detail-panel{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:0 solid var(--bd)}
+.job-detail-panel.open{max-height:300px;border-top:1px solid var(--bd)}
+.job-detail{font-size:11px;color:var(--t3);line-height:1.7;padding:12px 16px}
+
+/* ── ENV TAB ─────────────────────────────────────────────────── */
+.env-section{margin-bottom:26px}
+.env-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:10px}
+.env-table{width:100%;border-collapse:collapse;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.env-table thead{background:var(--s2)}
+.env-table th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:1px solid var(--bd)}
+.env-table td{padding:7px 12px;font-size:11px;color:var(--t2);border-bottom:1px solid var(--bd)}
+.env-table tr:last-child td{border-bottom:none}
+.env-table tr{transition:background .12s}
+.env-table tbody tr:hover td{background:rgba(255,255,255,.025)}
+.env-key{font-family:'JetBrains Mono',monospace;color:var(--t1);font-weight:500}
+.env-val{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:10px}
+.env-req{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;white-space:nowrap}
+.env-req-y{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
+.env-req-n{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br)}
+.env-code{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);
+  line-height:1.75;overflow-x:auto;position:relative;white-space:pre;
+}
+.env-code .c{color:var(--t3)}
+.env-code .k{color:var(--teal)}
+.env-code .v{color:var(--amber)}
+.copy-block-btn{
+  position:absolute;top:12px;right:12px;
+  background:var(--s2);border:1px solid var(--bd);
+  color:var(--t3);font-size:10px;padding:4px 10px;border-radius:5px;
+  cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;font-weight:500;
+}
+.copy-block-btn:hover{color:var(--t1);border-color:var(--bd2);background:var(--s3)}
+
+/* ── ERRORS TAB ──────────────────────────────────────────────── */
+.err-group{margin-bottom:26px}
+.err-group-title{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.err-group-label{font-size:12px;font-weight:600;color:var(--t1)}
+.err-list{display:flex;flex-direction:column;gap:5px}
+.err-item{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+  padding:10px 14px;display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;
+  transition:border-color .15s,box-shadow .18s;
+}
+.err-item:hover{border-color:var(--bd2);box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.err-code{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;padding:3px 0;line-height:1.2}
+.err-4xx{color:var(--amber)}
+.err-5xx{color:var(--red)}
+.err-ws{color:var(--teal);font-size:11px}
+.err-name{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.err-desc{font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:6px}
+.err-shape{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);background:var(--s2);padding:5px 9px;border-radius:4px;border:1px solid var(--bd);word-break:break-all}
+
+/* ── SEARCH OVERLAY ──────────────────────────────────────────── */
+.search-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:1000;display:none;align-items:flex-start;justify-content:center;
+  padding:80px 20px 20px;
+}
+.search-overlay.open{display:flex}
+.search-modal{
+  background:var(--s1);border:1px solid var(--bd2);border-radius:12px;
+  width:100%;max-width:560px;overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.7);
+}
+.search-input-wrap{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bd)}
+.search-icon{color:var(--t3);font-size:16px;flex-shrink:0}
+.search-input{
+  flex:1;background:none;border:none;outline:none;
+  font-size:14px;color:var(--t1);font-family:'Inter',sans-serif;
+}
+.search-input::placeholder{color:var(--t3)}
+.search-esc{font-size:9px;background:var(--s2);border:1px solid var(--bd);color:var(--t3);padding:2px 6px;border-radius:3px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.search-results{max-height:380px;overflow-y:auto;padding:6px 0}
+.search-empty{padding:24px;text-align:center;color:var(--t3);font-size:13px}
+.search-result{
+  padding:9px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;
+  transition:background .1s;
+}
+.search-result:hover,.search-result.focused{background:rgba(255,255,255,.04)}
+.sr-icon{font-size:14px;flex-shrink:0;width:22px;text-align:center}
+.sr-text{flex:1;min-width:0}
+.sr-title{font-size:12px;color:var(--t1);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.sr-tag{font-size:9px;background:var(--s2);border:1px solid var(--bd);color:var(--t3);padding:2px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.search-footer{padding:8px 16px;border-top:1px solid var(--bd);display:flex;gap:14px}
+.sf-hint{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.sf-hint kbd{background:var(--s2);border:1px solid var(--bd);padding:1px 4px;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:9px}
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:24px;left:0;right:0;margin:0 auto;width:max-content;
+  background:rgba(26,38,64,.97);border:1px solid var(--bd3);border-radius:8px;
+  padding:9px 16px;font-size:12px;color:var(--t1);
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);z-index:2000;
+  animation:toastIn .2s ease;
+}
+.toast.hiding{animation:toastOut .2s ease forwards}
+.toast-icon{color:var(--teal);font-size:13px}
+
+/* ── JUMP TO TOP ─────────────────────────────────────────────── */
+.jump-top{
+  position:fixed;bottom:24px;right:24px;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--s2);border:1px solid var(--bd2);
+  color:var(--t2);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:all .22s;z-index:500;
+}
+.jump-top.visible{opacity:1;pointer-events:auto}
+.jump-top:hover{background:var(--s3);color:var(--t1);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+
+/* ── INLINE CODE ─────────────────────────────────────────────── */
+code{font-family:'JetBrains Mono',monospace}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media(max-width:900px){
+  .arch-grid{grid-template-columns:1fr}
+  .content{padding:16px}
+  .header-hero{padding:14px 16px}
+  .tabs{padding:0 4px}
+}
+@media(max-width:680px){
+  .ws-layout{grid-template-columns:1fr}
+  .db-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .ep{grid-template-columns:40px 1fr}
+  .ep .tag-auth,.ep .tag-pub{display:none}
+  .header-badges .badge-blue{display:none}
+  .span2{grid-column:span 1}
+  .view-cols{grid-template-columns:1fr}
+  .err-item{grid-template-columns:50px 1fr}
+}
+@media(max-width:480px){
+  .header-title{font-size:13px}
+  .header-sub{display:none}
+  .rg-count{display:none}
+  .search-overlay{padding-top:50px}
+}
+</style>
+</head>
+<body>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay" onclick="overlayClick(event)">
+  <div class="search-modal">
+    <div class="search-input-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" placeholder="Search endpoints, tables, events, env vars…" autocomplete="off"
+        oninput="runSearch(this.value)" onkeydown="searchKey(event)">
+      <span class="search-esc">ESC</span>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-footer">
+      <span class="sf-hint"><kbd>↑↓</kbd> navigate</span>
+      <span class="sf-hint"><kbd>↵</kbd> jump to tab</span>
+      <span class="sf-hint"><kbd>ESC</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" style="display:none"></div>
+
+<!-- JUMP TO TOP -->
+<div class="jump-top" id="jumpTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-hero">
+    <div class="logo">⚽</div>
+    <div class="header-info">
+      <div class="header-title">FIFA 26 Gate Intelligence Engine</div>
+      <div class="header-sub">gate-intelligence-engine-backend · Node 18 · TypeScript · Express · :3000</div>
+    </div>
+    <div class="header-badges">
+      <div class="badge badge-blue">v1.0.0</div>
+      <div class="badge badge-green"><span class="dot"></span>Operational</div>
+      <button class="search-btn" onclick="openSearch()" title="Search (Ctrl+K)">
+        <span>⌕ Search</span><kbd>Ctrl K</kbd>
+      </button>
+    </div>
+  </div>
+  <div class="tabs" id="tabBar">
+    <div class="tab active" onclick="show('arch',this)" data-tab="arch">Architecture</div>
+    <div class="tab" onclick="show('api',this)" data-tab="api">API Endpoints<span class="tab-badge">11</span></div>
+    <div class="tab" onclick="show('db',this)" data-tab="db">Database<span class="tab-badge">13</span></div>
+    <div class="tab" onclick="show('rt',this)" data-tab="rt">Real-time</div>
+    <div class="tab" onclick="show('jobs',this)" data-tab="jobs">Jobs<span class="tab-badge">3</span></div>
+    <div class="tab" onclick="show('env',this)" data-tab="env">Env &amp; Config</div>
+    <div class="tab" onclick="show('errors',this)" data-tab="errors">Errors</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ARCHITECTURE                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="arch" class="section active">
+  <div class="info-row">
+    <div class="info-pill"><b>Express</b> HTTP server</div>
+    <div class="info-pill"><b>ws</b> WebSocket</div>
+    <div class="info-pill"><b>pg</b> PostgreSQL connection pool</div>
+    <div class="info-pill"><b>redis 4</b> cache layer</div>
+    <div class="info-pill"><b>Gemini</b> AI forecasting</div>
+    <div class="info-pill"><b>pino</b> structured logging</div>
+    <div class="info-pill"><b>node-cron</b> background jobs</div>
+  </div>
+  <div class="arch-grid">
+    <div class="layer-stack">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px">System layers</div>
+      <div class="layer lp">
+        <div class="layer-lbl">Clients</div>
+        <div class="layer-name">Fan App · Ops Console · Scanner</div>
+        <div class="layer-desc">HTTP REST + WebSocket clients</div>
+      </div>
+      <div class="mini-arr">↓</div>
+      <div class="layer lt">
+        <div class="layer-lbl">Middleware</div>
+        <div class="layer-name">Helmet · CORS · Rate limit · Auth · Logger</div>
+        <div class="layer-desc">Applied to every inbound request in order</div>
+      </div>
+      <div class="mini-arr">↓</div>
+      <div class="layer lp">
+        <div class="layer-lbl">Route layer</div>
+        <div class="layer-name">fans · ops · gates · health</div>
+        <div class="layer-desc">11 REST endpoints across 4 Express routers</div>
+      </div>
+      <div class="mini-arr">↓</div>
+      <div class="layer lt">
+        <div class="layer-lbl">Service layer</div>
+        <div class="layer-name">WaitTime · Nudge · Route · Outcome</div>
+        <div class="layer-desc">All business logic lives here; Gemini is an extension point</div>
+      </div>
+      <div class="mini-arr">↓</div>
+      <div class="layer lb">
+        <div class="layer-lbl">Data layer</div>
+        <div class="layer-name">PostgreSQL + Redis</div>
+        <div class="layer-desc">Auto-fallback to in-memory mock if unavailable</div>
+      </div>
+      <div class="layer la" style="margin-top:4px">
+        <div class="layer-lbl">Background</div>
+        <div class="layer-name">Broadcast · Aggregation · Calibration</div>
+        <div class="layer-desc">node-cron + setInterval — runs parallel to request handling</div>
+      </div>
+    </div>
+
+    <div class="arch-right">
+      <div class="flow-card">
+        <div class="flow-head">Fan nudge flow — GET /api/fans/nudge</div>
+        <div class="flow-body">
+          <div class="flow-row"><span class="chip chip-gray">Fan App</span><span class="arr">→</span><span class="chip chip-gray">?user_id=&amp;current_gate_id=&amp;lat=&amp;lng=</span></div>
+          <div class="flow-row"><span class="chip chip-teal">validateAuth</span><span class="arr">→</span><span class="chip chip-purple">fans router</span><span class="arr">→</span><span class="chip chip-purple">NudgeService.generateNudge()</span></div>
+          <div class="flow-row"><span class="chip chip-blue">SELECT gates (is_active=true)</span><span class="arr">→</span><span class="chip chip-teal">haversine filter &lt;500m</span></div>
+          <div class="flow-row"><span class="chip chip-teal">WaitTimeService × N nearby gates</span><span class="arr">→</span><span class="chip chip-blue">Redis cache (10s TTL)</span></div>
+          <div class="flow-row"><span class="chip chip-teal">calculateWaitTime(gate, forecast)</span><span class="arr">→</span><span class="chip chip-purple">INSERT nudges</span></div>
+          <div class="flow-row"><span class="chip chip-gray">← { nudge_id, recommended_gate, time_saved_min, confidence }</span></div>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-head">Ops wait-times — GET /api/ops/wait-times (with Redis caching)</div>
+        <div class="flow-body">
+          <div class="flow-row"><span class="chip chip-gray">Ops Console</span><span class="arr">→</span><span class="chip chip-teal">Redis.get("wait_times:stadiumA")</span></div>
+          <div class="flow-row" style="padding-left:14px"><span class="chip chip-green">HIT</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">return cached JSON (TTL 10s)</span></div>
+          <div class="flow-row" style="padding-left:14px"><span class="chip chip-amber">MISS</span><span class="arr">→</span><span class="chip chip-blue">SELECT gates WHERE venue_id = $1</span></div>
+          <div class="flow-row"><span class="chip chip-teal">calculateWaitForGate() × 8 gates</span></div>
+          <div class="flow-row"><span class="chip chip-teal">Redis.set(key, json, ttl=10)</span><span class="arr">→</span><span class="chip chip-gray">← { gate_1:{…}, gate_2:{…}, … }</span></div>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-head">Gate scan / Outcome flow — POST /api/fans/feedback</div>
+        <div class="flow-body">
+          <div class="flow-row"><span class="chip chip-gray">Ticket Scanner</span><span class="arr">→</span><span class="chip chip-gray">{ entry_token, actual_wait_min, predictions_accurate }</span></div>
+          <div class="flow-row"><span class="chip chip-teal">validateAuth</span><span class="arr">→</span><span class="chip chip-purple">fans router</span><span class="arr">→</span><span class="chip chip-purple">OutcomeService.recordFeedback()</span></div>
+          <div class="flow-row"><span class="chip chip-blue">INSERT feedback row</span><span class="arr">→</span><span class="chip chip-blue">INSERT gate_entries row</span></div>
+          <div class="flow-row"><span class="chip chip-amber">Calibration job (every 6h)</span><span class="arr">→</span><span class="chip chip-pink">MAPE per gate</span></div>
+          <div class="flow-row"><span class="chip chip-pink">MAPE &gt; 20%</span><span class="arr">→</span><span class="chip chip-amber">⚠ log warning + Gemini re-training hook</span></div>
+          <div class="flow-row"><span class="chip chip-gray">← { success: true, mape_warning: false }</span></div>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-head">Middleware stack — applied in order to every request</div>
+        <div class="flow-body">
+          <div class="flow-row"><span class="chip chip-gray">1</span><span class="chip chip-teal">helmet()</span><span style="font-size:11px;color:var(--t3)">— security headers, CSP, HSTS</span></div>
+          <div class="flow-row"><span class="chip chip-gray">2</span><span class="chip chip-teal">compression()</span><span style="font-size:11px;color:var(--t3)">— gzip response bodies</span></div>
+          <div class="flow-row"><span class="chip chip-gray">3</span><span class="chip chip-teal">cors()</span><span style="font-size:11px;color:var(--t3)">— ALLOWED_ORIGINS whitelist</span></div>
+          <div class="flow-row"><span class="chip chip-gray">4</span><span class="chip chip-teal">express-rate-limit</span><span style="font-size:11px;color:var(--t3)">— 100 req / 15 min per IP</span></div>
+          <div class="flow-row"><span class="chip chip-gray">5</span><span class="chip chip-teal">pino-http logger</span><span style="font-size:11px;color:var(--t3)">— structured request/response logs</span></div>
+          <div class="flow-row"><span class="chip chip-gray">6</span><span class="chip chip-amber">validateAuth JWT</span><span style="font-size:11px;color:var(--t3)">— required for /fans, /ops, /gates</span></div>
+          <div class="flow-row"><span class="chip chip-gray">7</span><span class="chip chip-purple">Route handler</span><span style="font-size:11px;color:var(--t3)">— your business logic runs here</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- API ENDPOINTS                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="api" class="section">
+  <div class="route-group">
+    <div class="rg-head">
+      <span class="chip chip-green">public</span>
+      <span class="rg-prefix">/api/health</span>
+      <span class="rg-count">1 endpoint · no auth</span>
+    </div>
+    <div class="ep-list">
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/health</div>
+          <div class="ep-desc">Service status, version, uptime (s), active WebSocket client count, DB timestamp. Returns 503 if DB unreachable.</div>
+        </div>
+        <span class="tag-pub">public</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="route-group">
+    <div class="rg-head">
+      <span class="chip chip-purple">fan app</span>
+      <span class="rg-prefix">/api/fans</span>
+      <span class="rg-count">4 endpoints · requires auth</span>
+    </div>
+    <div class="ep-list">
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/fans/nudge</div>
+          <div class="ep-desc">Generate a gate-switch nudge for a fan. Query: <code style="font-size:10px;color:var(--teal)">user_id, current_gate_id, lat, lng</code>. Filters gates within 500m via Haversine, compares wait times, persists nudge record, returns recommended gate + minutes saved.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mpost">POST</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/fans/route</div>
+          <div class="ep-desc">Calculate walking route between two gates. Body: <code style="font-size:10px;color:var(--purple)">from_gate_id, to_gate_id</code>. Returns waypoints and estimated walk time.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mpost">POST</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/fans/confirm</div>
+          <div class="ep-desc">Fan accepts nudge → issues a 20-minute entry token. Body: <code style="font-size:10px;color:var(--purple)">nudge_id, user_id, selected_gate_id, predicted_wait_min</code>. Token format: <code style="font-size:10px;color:var(--amber)">entr_{timestamp}_{random}</code>.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mpost">POST</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/fans/feedback</div>
+          <div class="ep-desc">Post-entry feedback for calibration. Body: <code style="font-size:10px;color:var(--purple)">entry_token, actual_wait_min, predictions_accurate, experience</code>. Feeds the 6-hourly MAPE calibration job.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="route-group">
+    <div class="rg-head">
+      <span class="chip chip-teal">ops console</span>
+      <span class="rg-prefix">/api/ops</span>
+      <span class="rg-count">4 endpoints · requires auth</span>
+    </div>
+    <div class="ep-list">
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/ops/wait-times</div>
+          <div class="ep-desc">All gate wait times for a venue. Redis-cached (10s TTL). Query: <code style="font-size:10px;color:var(--teal)">venue_id</code> (default: stadiumA). Returns map of gate_id → { estimated_wait_min, confidence, trend, breakdown }.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/ops/dashboard</div>
+          <div class="ep-desc">Outcome metrics from materialized view. Query: <code style="font-size:10px;color:var(--teal)">event_date</code>. Returns nudges_sent, engagements, confirmations, entries, MAPE %, avg time saved.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/ops/funnel</div>
+          <div class="ep-desc">Conversion funnel per event. Query: <code style="font-size:10px;color:var(--teal)">event_id</code>. Returns nudge→engagement→confirmation→gate entry counts from <code style="font-size:10px;color:var(--amber)">conversion_funnel</code> materialized view.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mpost">POST</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/ops/action</div>
+          <div class="ep-desc">Log an ops intervention, then broadcast to all WS clients. Body: <code style="font-size:10px;color:var(--purple)">action, gate_id, duration_min</code>. Actions: close_gate · deploy_staff · slow_entry · open_gate.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="route-group">
+    <div class="rg-head">
+      <span class="chip chip-blue">gate data</span>
+      <span class="rg-prefix">/api/gates</span>
+      <span class="rg-count">2 endpoints · requires auth</span>
+    </div>
+    <div class="ep-list">
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/gates</div>
+          <div class="ep-desc">All active gates with full config: throughput_per_min, max_queue_length, processing_time_sec, crowd_slowdown_factor, GPS coords, zone.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+      <div class="ep">
+        <span class="method mget">GET</span>
+        <div>
+          <div class="ep-path" onclick="copyPath(this)">/api/gates/:id</div>
+          <div class="ep-desc">Single gate detail by <code style="font-size:10px;color:var(--blue)">gate_id</code>. Returns 404 with JSON error if not found.</div>
+        </div>
+        <span class="tag-auth">auth</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DATABASE                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="db" class="section">
+  <div class="info-row">
+    <div class="info-pill"><span style="background:var(--amber);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px"></span>PK — primary key</div>
+    <div class="info-pill"><span style="background:var(--purple);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px"></span>FK — hover for reference</div>
+    <div class="info-pill"><span style="background:rgba(255,255,255,.2);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px"></span>column</div>
+    <div class="info-pill"><b>PostgreSQL 15</b> · uuid-ossp extension</div>
+    <div class="info-pill"><b>11</b> tables · <b>2</b> mat. views · <b>1</b> AI table</div>
+  </div>
+  <div class="db-grid">
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">venues</span><span class="tbl-type tt-base">base</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">venue_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">name</span><span class="col-type">VARCHAR(200)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">capacity</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">location_lat/lng</span><span class="col-type">FLOAT8</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">events</span><span class="tbl-type tt-base">base</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">event_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ venues</span></span>&nbsp;<span class="col-name">venue_id</span><span class="col-type">→ venues</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">scheduled_start</span><span class="col-type">TIMESTAMPTZ</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">expected_attendance</span><span class="col-type">INTEGER</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">gates</span><span class="tbl-type tt-base">base</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">gate_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ venues</span></span>&nbsp;<span class="col-name">venue_id</span><span class="col-type">→ venues</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">throughput_per_min</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">crowd_slowdown_factor</span><span class="col-type">NUMERIC</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">max_queue_length</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">is_active</span><span class="col-type">BOOLEAN</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">queue_observations</span><span class="tbl-type tt-tx">sensor</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">observed_queue_count</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">observation_source</span><span class="col-type">sensor|cctv</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">confidence</span><span class="col-type">NUMERIC(3,2)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">nudges</span><span class="tbl-type tt-tx">tx</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">nudge_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">user_id</span><span class="col-type">VARCHAR(64)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">current_gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">recommended_gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">time_saved_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">forecast_confidence</span><span class="col-type">NUMERIC(3,2)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">confirmations</span><span class="tbl-type tt-tx">tx</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">entry_token</span><span class="col-type">VARCHAR(100)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ nudges</span></span>&nbsp;<span class="col-name">nudge_id</span><span class="col-type">→ nudges</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">confirmed_gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">predicted_wait_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">expires_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">gate_entries</span><span class="tbl-type tt-tx">tx</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">scan_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ confirmations</span></span>&nbsp;<span class="col-name">entry_token</span><span class="col-type">→ confirmations</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">wait_time_actual_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">feedback</span><span class="tbl-type tt-tx">tx</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ confirmations</span></span>&nbsp;<span class="col-name">entry_token</span><span class="col-type">→ confirmations</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">actual_wait_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">predictions_accurate</span><span class="col-type">BOOLEAN</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">experience</span><span class="col-type">VARCHAR(20)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">ops_actions</span><span class="tbl-type tt-tx">ops log</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">action_id</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">action</span><span class="col-type">VARCHAR(50)</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">duration_min</span><span class="col-type">INTEGER</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">wait_time_estimates</span><span class="tbl-type tt-tx">history</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">estimated_wait_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">queue_count</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">confidence</span><span class="col-type">NUMERIC(3,2)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl">
+      <div class="tbl-head"><span class="tbl-name">ai_forecasts</span><span class="tbl-type tt-ai">AI</span></div>
+      <div class="tbl-cols">
+        <div class="col"><span class="dot-pk"></span><span class="col-name">forecast_id</span><span class="col-type">UUID</span></div>
+        <div class="col"><span class="fk-wrap"><span class="dot-fk"></span><span class="fk-tip">→ gates</span></span>&nbsp;<span class="col-name">gate_id</span><span class="col-type">→ gates</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">gemini_model</span><span class="col-type">VARCHAR(100)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">predicted_wait_min</span><span class="col-type">NUMERIC(6,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">confidence_score</span><span class="col-type">NUMERIC(3,2)</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">forecast_horizon_min</span><span class="col-type">INTEGER</span></div>
+        <div class="col"><span class="dot-col"></span><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+      </div>
+    </div>
+
+    <div class="tbl span2">
+      <div class="tbl-head"><span class="tbl-name">journey_complete</span><span class="tbl-type tt-view">mat. view</span></div>
+      <div class="view-cols">
+        <div class="tbl-cols">
+          <div class="col"><span class="dot-col"></span><span class="col-name">nudge_id · user_id</span></div>
+          <div class="col"><span class="dot-col"></span><span class="col-name">time_saved_min · predicted_wait_min</span></div>
+          <div class="col"><span class="dot-col"></span><span class="col-name">wait_time_actual_min</span><span class="col-type">NUMERIC</span></div>
+          <div class="col"><span class="dot-col"></span><span class="col-name">scanned_at · nudge_sent_at</span></div>
+        </div>
+        <div>
+          <div class="view-note" style="padding:10px 12px 4px">Joins: nudges → confirmations → gate_entries</div>
+          <div class="view-note">Unique index on nudge_id (idx_jc_nudge)</div>
+          <div class="view-note">Refreshed hourly by the Aggregation job (CONCURRENTLY, no read locks)</div>
+          <div class="view-note">Powers: GET /api/ops/dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl span2">
+      <div class="tbl-head"><span class="tbl-name">conversion_funnel</span><span class="tbl-type tt-view">mat. view</span></div>
+      <div class="view-cols">
+        <div class="tbl-cols">
+          <div class="col"><span class="dot-col"></span><span class="col-name">event_date</span><span class="col-type">DATE</span></div>
+          <div class="col"><span class="dot-col"></span><span class="col-name">nudges_sent · nudge_engagements</span></div>
+          <div class="col"><span class="dot-col"></span><span class="col-name">confirmations · gate_entries</span><span class="col-type">COUNT</span></div>
+        </div>
+        <div>
+          <div class="view-note" style="padding:10px 12px 4px">Group by event date</div>
+          <div class="view-note">Unique index on (event_date, created_at) (idx_cf_date)</div>
+          <div class="view-note">Refreshed hourly by the Aggregation job</div>
+          <div class="view-note">Powers: GET /api/ops/funnel</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- REAL-TIME                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="rt" class="section">
+  <div class="info-row">
+    <div class="info-pill"><b>ws</b> library — attaches to existing http.Server</div>
+    <div class="info-pill">perMessageDeflate: <b>true</b></div>
+    <div class="info-pill">maxPayload: <b>100 KB</b></div>
+    <div class="info-pill">in-memory <b>Set&lt;WebSocket&gt;</b> — stale sockets pruned on broadcast</div>
+  </div>
+  <div class="ws-layout">
+    <div class="ws-card">
+      <div class="ws-head">
+        <div class="ws-title">Client → Server messages</div>
+        <div class="ws-sub">ws://localhost:3000</div>
+      </div>
+      <div class="ws-body">
+        <div class="ev">
+          <div class="ev-type">subscribe</div>
+          <div class="ev-trigger">Fan app connects and subscribes to live wait time data</div>
+          <div class="ev-payload">{ "type": "subscribe", "payload": { "channel": "wait_times" } }</div>
+        </div>
+        <div class="ev">
+          <div class="ev-type">ping</div>
+          <div class="ev-trigger">Keepalive heartbeat from any client to keep connection alive</div>
+          <div class="ev-payload">{ "type": "ping" }</div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-card">
+      <div class="ws-head">
+        <div class="ws-title">Server → Client broadcasts</div>
+        <div class="ws-sub">all clients in connections Set</div>
+      </div>
+      <div class="ws-body">
+        <div class="ev">
+          <div class="ev-type">subscribed</div>
+          <div class="ev-trigger">Ack after a subscribe message</div>
+          <div class="ev-payload">{ "type": "subscribed", "channel": "wait_times", "timestamp": "…" }</div>
+        </div>
+        <div class="ev">
+          <div class="ev-type">pong</div>
+          <div class="ev-trigger">Response to ping</div>
+          <div class="ev-payload">{ "type": "pong", "timestamp": "2026-07-19T…" }</div>
+        </div>
+        <div class="ev">
+          <div class="ev-type">wait_times_updated</div>
+          <div class="ev-trigger">Broadcast job fires every 30 seconds automatically</div>
+          <div class="ev-payload">{ "type": "wait_times_updated", "data": { "gate_1": { "estimated_wait_min": 4.2, "confidence": 0.91 }, … }, "timestamp": "…" }</div>
+        </div>
+        <div class="ev">
+          <div class="ev-type">ops_action</div>
+          <div class="ev-trigger">Triggered when POST /api/ops/action is called</div>
+          <div class="ev-payload">{ "type": "ops_action", "data": { "action": "close_gate", "gate_id": "gate_2", "duration_min": 15 }, "timestamp": "…" }</div>
+        </div>
+        <div class="ev">
+          <div class="ev-type">error</div>
+          <div class="ev-trigger">Malformed / unknown message type received from client</div>
+          <div class="ev-payload">{ "type": "error", "message": "Failed to process message" }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flow-card" style="margin-bottom:14px">
+    <div class="flow-head">Connection lifecycle</div>
+    <div class="flow-body">
+      <div class="flow-row"><span class="chip chip-green">client connects</span><span class="arr">→</span><span class="chip chip-teal">connections.add(ws)</span><span style="font-size:11px;color:var(--t3)">— logged with total count</span></div>
+      <div class="flow-row"><span class="chip chip-teal">ws.on('message')</span><span class="arr">→</span><span class="chip chip-purple">handleWebSocketMessage(ws, data)</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">switch on type</span></div>
+      <div class="flow-row"><span class="chip chip-amber">ws.on('close')</span><span class="arr">→</span><span class="chip chip-teal">connections.delete(ws)</span></div>
+      <div class="flow-row"><span class="chip chip-amber">ws.on('error')</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">pino error log — connection stays in set until close fires</span></div>
+      <div class="flow-row"><span class="chip chip-gray">on broadcast</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">sockets in CLOSING/CLOSED state are deleted from connections Set automatically</span></div>
+    </div>
+  </div>
+  <div class="flow-card">
+    <div class="flow-head">Broadcast sequence — setInterval every 30 s</div>
+    <div class="flow-body">
+      <div class="flow-row"><span class="chip chip-amber">tick (t + 0 ms)</span><span class="arr">→</span><span class="chip chip-teal">WaitTimeService.getAllWaitTimes(venueId)</span></div>
+      <div class="flow-row" style="padding-left:14px"><span class="chip chip-green">Redis HIT</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">return cached (avg ~0.3 ms)</span></div>
+      <div class="flow-row" style="padding-left:14px"><span class="chip chip-amber">Redis MISS</span><span class="arr">→</span><span class="chip chip-blue">PG query × 8 gates</span><span class="arr">→</span><span class="chip chip-teal">Redis.set(ttl=10)</span><span style="font-size:11px;color:var(--t3)">(avg ~12 ms)</span></div>
+      <div class="flow-row"><span class="chip chip-purple">broadcastWaitTimes(data)</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">iterate connections Set</span></div>
+      <div class="flow-row" style="padding-left:14px"><span class="chip chip-green">readyState === OPEN</span><span class="arr">→</span><span class="chip chip-teal">ws.send(JSON)</span></div>
+      <div class="flow-row" style="padding-left:14px"><span class="chip chip-red">readyState !== OPEN</span><span class="arr">→</span><span class="chip chip-amber">connections.delete(ws)</span></div>
+      <div class="flow-row"><span class="chip chip-gray">tick (t + 30 000 ms)</span><span class="arr">→</span><span style="font-size:11px;color:var(--t3)">repeat indefinitely · clearInterval on SIGTERM</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- JOBS                                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="jobs" class="section">
+  <div class="info-row">
+    <div class="info-pill">Guarded by <b>ENABLE_SCHEDULED_JOBS=true</b></div>
+    <div class="info-pill"><b>node-cron</b> for CRON expressions</div>
+    <div class="info-pill"><b>setInterval</b> for the broadcast loop</div>
+    <div class="info-pill">All jobs start inside <b>bootstrap()</b> after DB + Redis are connected</div>
+    <div class="info-pill" style="color:var(--t3)">Click a job to expand details</div>
+  </div>
+  <div class="jobs-list">
+
+    <div class="job" style="border-color:rgba(0,212,170,.25)">
+      <div class="job-summary" onclick="toggleJob(this)">
+        <div class="job-summary-left">
+          <div class="job-head">
+            <div class="job-name">⚡ Wait Time Broadcast</div>
+            <div class="job-cron">setInterval · every 30 seconds</div>
+          </div>
+          <div class="job-desc">Recalculates all 8 gate wait times and pushes fresh data to every connected WebSocket client in real time.</div>
+          <div class="job-tags">
+            <span class="jtag">setInterval(30_000)</span>
+            <span class="jtag">WaitTimeService</span>
+            <span class="jtag">broadcastWaitTimes()</span>
+            <span class="jtag">Redis 10s TTL</span>
+            <span class="jtag">stops on SIGTERM via clearInterval</span>
+          </div>
+        </div>
+        <span class="job-expand-icon">⌄</span>
+      </div>
+      <div class="job-detail-panel">
+        <div class="job-detail">
+          Calls <code style="color:var(--teal)">WaitTimeService.getAllWaitTimes(venueId)</code> → checks Redis cache (10s TTL) or recomputes from Postgres →
+          <code style="color:var(--teal)">broadcastWaitTimes()</code> → iterates the connections Set, sends <code style="color:var(--teal)">wait_times_updated</code> to every OPEN socket,
+          removes any CLOSING/CLOSED sockets from the pool. If the calculation throws, the error is logged via pino and the interval waits for the next tick.
+        </div>
+      </div>
+    </div>
+
+    <div class="job" style="border-color:rgba(139,125,232,.25)">
+      <div class="job-summary" onclick="toggleJob(this)">
+        <div class="job-summary-left">
+          <div class="job-head">
+            <div class="job-name">📊 Aggregation Job</div>
+            <div class="job-cron">0 * * * * · hourly</div>
+          </div>
+          <div class="job-desc">Refreshes both PostgreSQL materialized views so dashboard queries stay fast without blocking readers during the refresh.</div>
+          <div class="job-tags">
+            <span class="jtag">node-cron</span>
+            <span class="jtag">REFRESH MATERIALIZED VIEW CONCURRENTLY</span>
+            <span class="jtag">journey_complete</span>
+            <span class="jtag">conversion_funnel</span>
+            <span class="jtag">requires unique index to use CONCURRENTLY</span>
+          </div>
+        </div>
+        <span class="job-expand-icon">⌄</span>
+      </div>
+      <div class="job-detail-panel">
+        <div class="job-detail">
+          Executes <code style="color:var(--purple)">REFRESH MATERIALIZED VIEW CONCURRENTLY journey_complete</code> then
+          <code style="color:var(--purple)">REFRESH MATERIALIZED VIEW CONCURRENTLY conversion_funnel</code>.
+          The CONCURRENTLY keyword means both views remain readable during the refresh — zero downtime for /ops/dashboard and /ops/funnel.
+          Requires the unique indexes <code style="color:var(--t2)">idx_jc_nudge</code> and <code style="color:var(--t2)">idx_cf_date</code> to already exist — they are created by the migration scripts.
+        </div>
+      </div>
+    </div>
+
+    <div class="job" style="border-color:rgba(245,166,35,.25)">
+      <div class="job-summary" onclick="toggleJob(this)">
+        <div class="job-summary-left">
+          <div class="job-head">
+            <div class="job-name">🎯 Forecast Calibration Job</div>
+            <div class="job-cron">0 */6 * * * · every 6 hours</div>
+          </div>
+          <div class="job-desc">Computes per-gate MAPE by comparing predicted vs actual wait times. Warns when accuracy drops below the 20% threshold.</div>
+          <div class="job-tags">
+            <span class="jtag">node-cron</span>
+            <span class="jtag">MAPE = MAE / predicted × 100</span>
+            <span class="jtag">confirmations JOIN gate_entries</span>
+            <span class="jtag">6-hour window</span>
+            <span class="jtag">⚠ alert if MAPE &gt; 20%</span>
+            <span class="jtag">Gemini re-training hook</span>
+          </div>
+        </div>
+        <span class="job-expand-icon">⌄</span>
+      </div>
+      <div class="job-detail-panel">
+        <div class="job-detail">
+          Joins <code style="color:var(--amber)">confirmations → gate_entries</code> on entry_token, filters to the last 6 hours,
+          computes <code style="color:var(--amber)">AVG(|predicted - actual| / predicted) × 100</code> per gate.
+          If any gate's MAPE exceeds 20%, a warning is logged with the gate_id and MAPE value.
+          This is the designed hook point for Gemini re-calibration or manual parameter tuning — the current implementation logs only.
+          Requires real gate_entries rows (from ticket scanners writing actual wait times back to the DB).
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ENV & CONFIG                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="env" class="section">
+  <div class="info-row">
+    <div class="info-pill">Copy the block below into <b>.env</b> and fill in your values</div>
+    <div class="info-pill"><b>Required</b> vars must be set before startup</div>
+    <div class="info-pill">Loaded via <b>process.env</b> — no dotenv package required in production</div>
+  </div>
+
+  <div class="env-section">
+    <div class="env-section-title">Environment Variables</div>
+    <table class="env-table">
+      <thead>
+        <tr><th>Variable</th><th>Required</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="env-key">PORT</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">3000</span></td><td>HTTP server listen port</td></tr>
+        <tr><td><span class="env-key">NODE_ENV</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">development</span></td><td>Runtime environment; controls log verbosity and error detail in responses</td></tr>
+        <tr><td><span class="env-key">DATABASE_URL</span></td><td><span class="env-req env-req-y">required</span></td><td>—</td><td>PostgreSQL connection string: <code style="font-size:10px;color:var(--t3)">postgresql://user:pass@host:5432/db</code></td></tr>
+        <tr><td><span class="env-key">REDIS_URL</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">redis://localhost:6379</span></td><td>Redis connection URL. Falls back to in-memory mock if unreachable at startup</td></tr>
+        <tr><td><span class="env-key">JWT_SECRET</span></td><td><span class="env-req env-req-y">required</span></td><td>—</td><td>HS256 signing secret for <code style="font-size:10px;color:var(--t3)">validateAuth</code> middleware. Minimum 32 characters</td></tr>
+        <tr><td><span class="env-key">ALLOWED_ORIGINS</span></td><td><span class="env-req env-req-y">required</span></td><td>—</td><td>Comma-separated CORS whitelist e.g. <code style="font-size:10px;color:var(--t3)">https://app.fifa26.com,https://ops.fifa26.com</code></td></tr>
+        <tr><td><span class="env-key">GEMINI_API_KEY</span></td><td><span class="env-req env-req-y">required</span></td><td>—</td><td>Google AI Studio / Vertex AI key for Gemini forecasting calls</td></tr>
+        <tr><td><span class="env-key">GEMINI_MODEL</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">gemini-2.0-flash</span></td><td>Gemini model identifier used for wait time forecast generation</td></tr>
+        <tr><td><span class="env-key">ENABLE_SCHEDULED_JOBS</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">true</span></td><td>Set to <code style="font-size:10px;color:var(--t3)">false</code> in test/CI environments to disable all background jobs</td></tr>
+        <tr><td><span class="env-key">VENUE_ID</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">stadiumA</span></td><td>Default venue ID used by the broadcast job and <code style="font-size:10px;color:var(--t3)">/api/ops/wait-times</code></td></tr>
+        <tr><td><span class="env-key">RATE_LIMIT_MAX</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">100</span></td><td>Max requests per IP per 15-minute window (express-rate-limit)</td></tr>
+        <tr><td><span class="env-key">LOG_LEVEL</span></td><td><span class="env-req env-req-n">optional</span></td><td><span class="env-val">info</span></td><td>Pino log level: trace · debug · info · warn · error · fatal</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="env-section">
+    <div class="env-section-title">.env.example</div>
+    <div class="env-code" id="envBlock">
+      <button class="copy-block-btn" onclick="copyEnvBlock()">Copy</button>
+<span class="c"># Gate Intelligence Engine — .env.example</span>
+<span class="c"># Copy this file to .env and fill in your values</span>
+
+<span class="c"># ── Server ────────────────────────────────────────────</span>
+<span class="k">PORT</span>=<span class="v">3000</span>
+<span class="k">NODE_ENV</span>=<span class="v">development</span>
+<span class="k">LOG_LEVEL</span>=<span class="v">info</span>
+
+<span class="c"># ── Database ──────────────────────────────────────────</span>
+<span class="k">DATABASE_URL</span>=<span class="v">postgresql://gie_user:password@localhost:5432/gate_intelligence</span>
+<span class="k">REDIS_URL</span>=<span class="v">redis://localhost:6379</span>
+
+<span class="c"># ── Auth &amp; Security ───────────────────────────────────</span>
+<span class="k">JWT_SECRET</span>=<span class="v">change_me_min_32_chars_long_secret_key_here</span>
+<span class="k">ALLOWED_ORIGINS</span>=<span class="v">http://localhost:3001,http://localhost:3002</span>
+<span class="k">RATE_LIMIT_MAX</span>=<span class="v">100</span>
+
+<span class="c"># ── Gemini AI ─────────────────────────────────────────</span>
+<span class="k">GEMINI_API_KEY</span>=<span class="v">your_google_ai_studio_api_key_here</span>
+<span class="k">GEMINI_MODEL</span>=<span class="v">gemini-2.0-flash</span>
+
+<span class="c"># ── Jobs ──────────────────────────────────────────────</span>
+<span class="k">ENABLE_SCHEDULED_JOBS</span>=<span class="v">true</span>
+<span class="k">VENUE_ID</span>=<span class="v">stadiumA</span></div>
+  </div>
+
+  <div class="env-section">
+    <div class="env-section-title">Dependency Matrix</div>
+    <table class="env-table">
+      <thead>
+        <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="env-key">express</span></td><td><span class="env-val">^4.18</span></td><td>HTTP server and routing framework</td></tr>
+        <tr><td><span class="env-key">ws</span></td><td><span class="env-val">^8.17</span></td><td>WebSocket server attached to http.Server</td></tr>
+        <tr><td><span class="env-key">pg</span></td><td><span class="env-val">^8.11</span></td><td>PostgreSQL client with built-in connection pooling</td></tr>
+        <tr><td><span class="env-key">redis</span></td><td><span class="env-val">^4.6</span></td><td>Redis v4 client — promise-based, auto-reconnect</td></tr>
+        <tr><td><span class="env-key">@google/generative-ai</span></td><td><span class="env-val">^0.21</span></td><td>Gemini AI SDK for forecast generation calls</td></tr>
+        <tr><td><span class="env-key">pino</span></td><td><span class="env-val">^8.21</span></td><td>Structured JSON logging (ndjson output)</td></tr>
+        <tr><td><span class="env-key">pino-http</span></td><td><span class="env-val">^9.3</span></td><td>HTTP request/response logging middleware</td></tr>
+        <tr><td><span class="env-key">node-cron</span></td><td><span class="env-val">^3.0</span></td><td>CRON expression scheduler for background jobs</td></tr>
+        <tr><td><span class="env-key">helmet</span></td><td><span class="env-val">^7.1</span></td><td>Security headers: CSP, HSTS, X-Frame-Options, etc.</td></tr>
+        <tr><td><span class="env-key">cors</span></td><td><span class="env-val">^2.8</span></td><td>CORS origin whitelist middleware</td></tr>
+        <tr><td><span class="env-key">express-rate-limit</span></td><td><span class="env-val">^7.2</span></td><td>IP-based rate limiting (100 req / 15 min)</td></tr>
+        <tr><td><span class="env-key">compression</span></td><td><span class="env-val">^1.7</span></td><td>gzip response compression middleware</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ERRORS                                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="errors" class="section">
+  <div class="info-row">
+    <div class="info-pill">All error responses use <b>JSON</b> shape: <code style="font-size:10px;color:var(--t3)">{ error, code, message }</code></div>
+    <div class="info-pill">Content-Type: <b>application/json</b> always set</div>
+    <div class="info-pill">Stack traces hidden in <b>production</b> (NODE_ENV=production)</div>
+  </div>
+
+  <div class="err-group">
+    <div class="err-group-title">
+      <span class="chip chip-amber">4xx</span>
+      <span class="err-group-label">Client Errors</span>
+    </div>
+    <div class="err-list">
+      <div class="err-item">
+        <div class="err-code err-4xx">400</div>
+        <div>
+          <div class="err-name">Bad Request — Missing or invalid parameters</div>
+          <div class="err-desc">Query or body parameters fail validation. Returned by all endpoints when required fields are absent or malformed (e.g. non-numeric lat/lng on <code style="font-size:10px;color:var(--teal)">/fans/nudge</code>, missing <code style="font-size:10px;color:var(--teal)">user_id</code>).</div>
+          <div class="err-shape">{ "error": "BAD_REQUEST", "code": 400, "message": "user_id is required" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-4xx">401</div>
+        <div>
+          <div class="err-name">Unauthorized — Missing or invalid JWT</div>
+          <div class="err-desc">Authorization header is absent, JWT is malformed, signature verification fails, or the token is expired. Applies to all routes protected by <code style="font-size:10px;color:var(--amber)">validateAuth</code> middleware: /fans, /ops, /gates.</div>
+          <div class="err-shape">{ "error": "UNAUTHORIZED", "code": 401, "message": "Invalid or expired token" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-4xx">404</div>
+        <div>
+          <div class="err-name">Not Found — Resource does not exist</div>
+          <div class="err-desc">Returned by <code style="font-size:10px;color:var(--blue)">GET /api/gates/:id</code> when the gate_id is not present in the database, or by any undefined route path.</div>
+          <div class="err-shape">{ "error": "NOT_FOUND", "code": 404, "message": "Gate gate_99 not found" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-4xx">409</div>
+        <div>
+          <div class="err-name">Conflict — Duplicate submission</div>
+          <div class="err-desc">Returned by <code style="font-size:10px;color:var(--purple)">POST /api/fans/feedback</code> when an entry_token has already been used to submit feedback (unique constraint on <code style="font-size:10px;color:var(--t3)">feedback.entry_token</code>).</div>
+          <div class="err-shape">{ "error": "CONFLICT", "code": 409, "message": "Feedback already submitted for this entry token" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-4xx">410</div>
+        <div>
+          <div class="err-name">Gone — Entry token expired</div>
+          <div class="err-desc">Returned by <code style="font-size:10px;color:var(--purple)">POST /api/fans/confirm</code> when the nudge token has passed its 20-minute expiry window (<code style="font-size:10px;color:var(--t3)">confirmations.expires_at &lt; NOW()</code>).</div>
+          <div class="err-shape">{ "error": "TOKEN_EXPIRED", "code": 410, "message": "Entry token has expired" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-4xx">429</div>
+        <div>
+          <div class="err-name">Too Many Requests — Rate limit exceeded</div>
+          <div class="err-desc">Client IP exceeded 100 requests in a 15-minute window. Managed by express-rate-limit. Response includes a <code style="font-size:10px;color:var(--t3)">Retry-After</code> header.</div>
+          <div class="err-shape">{ "error": "RATE_LIMITED", "code": 429, "message": "Too many requests, please slow down" }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="err-group">
+    <div class="err-group-title">
+      <span class="chip chip-red">5xx</span>
+      <span class="err-group-label">Server Errors</span>
+    </div>
+    <div class="err-list">
+      <div class="err-item">
+        <div class="err-code err-5xx">500</div>
+        <div>
+          <div class="err-name">Internal Server Error — Unhandled exception</div>
+          <div class="err-desc">Catch-all for unhandled errors in route handlers or service layer. Full stack trace is logged via pino. In production (<code style="font-size:10px;color:var(--t3)">NODE_ENV=production</code>) the response never exposes the stack.</div>
+          <div class="err-shape">{ "error": "INTERNAL_ERROR", "code": 500, "message": "An unexpected error occurred" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-5xx">503</div>
+        <div>
+          <div class="err-name">Service Unavailable — Database unreachable</div>
+          <div class="err-desc">Returned exclusively by <code style="font-size:10px;color:var(--green)">GET /api/health</code> when PostgreSQL cannot be reached. All other endpoints fall back to the in-memory mock layer and continue returning 200s.</div>
+          <div class="err-shape">{ "error": "DB_UNREACHABLE", "code": 503, "message": "Database connection failed", "status": "degraded" }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="err-group">
+    <div class="err-group-title">
+      <span class="chip chip-teal">WS</span>
+      <span class="err-group-label">WebSocket Error Events</span>
+    </div>
+    <div class="err-list">
+      <div class="err-item">
+        <div class="err-code err-ws">error<br>event</div>
+        <div>
+          <div class="err-name">Unknown message type</div>
+          <div class="err-desc">Client sends a WebSocket message with an unrecognised <code style="font-size:10px;color:var(--t3)">type</code> field. The connection is kept alive; an error event is sent back to the specific client only.</div>
+          <div class="err-shape">{ "type": "error", "message": "Failed to process message" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code err-ws">error<br>event</div>
+        <div>
+          <div class="err-name">Invalid JSON payload</div>
+          <div class="err-desc">Client sends a non-JSON text frame. <code style="font-size:10px;color:var(--t3)">JSON.parse</code> throws; the error is caught, logged via pino, and an error event returned. The connection is not terminated.</div>
+          <div class="err-shape">{ "type": "error", "message": "Failed to process message" }</div>
+        </div>
+      </div>
+      <div class="err-item">
+        <div class="err-code" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--amber);line-height:1.3;padding:3px 0">stale<br>socket</div>
+        <div>
+          <div class="err-name">Stale socket pruning</div>
+          <div class="err-desc">During every broadcast iteration, sockets in CLOSING or CLOSED <code style="font-size:10px;color:var(--t3)">readyState</code> are silently removed from the connections Set. No error event is emitted to clients.</div>
+          <div class="err-shape">// Server-side only — connections.delete(ws) called automatically during broadcast loop</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ── TAB SWITCHING ──────────────────────────────────────────────────
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// Keyboard tab navigation (← →)
+document.addEventListener('keydown', e => {
+  if (document.getElementById('searchOverlay').classList.contains('open')) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const active = tabs.findIndex(t => t.classList.contains('active'));
+  if (e.key === 'ArrowRight') { e.preventDefault(); tabs[(active + 1) % tabs.length].click(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); tabs[(active - 1 + tabs.length) % tabs.length].click(); }
+});
+
+// ── JOB ACCORDION ──────────────────────────────────────────────────
+function toggleJob(summary) {
+  const panel = summary.nextElementSibling;
+  const icon  = summary.querySelector('.job-expand-icon');
+  panel.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+// ── COPY PATH (endpoint) ───────────────────────────────────────────
+function copyPath(el) {
+  const path = el.textContent.replace('⎘','').trim();
+  navigator.clipboard.writeText(path).then(() => showToast('✓', 'Copied: ' + path));
+}
+
+// ── COPY .ENV BLOCK ────────────────────────────────────────────────
+function copyEnvBlock() {
+  const lines = [
+    '# Gate Intelligence Engine — .env.example',
+    '# Copy this file to .env and fill in your values',
+    '',
+    '# ── Server ────────────────────────────────────────────',
+    'PORT=3000',
+    'NODE_ENV=development',
+    'LOG_LEVEL=info',
+    '',
+    '# ── Database ──────────────────────────────────────────',
+    'DATABASE_URL=postgresql://gie_user:password@localhost:5432/gate_intelligence',
+    'REDIS_URL=redis://localhost:6379',
+    '',
+    '# ── Auth & Security ───────────────────────────────────',
+    'JWT_SECRET=change_me_min_32_chars_long_secret_key_here',
+    'ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002',
+    'RATE_LIMIT_MAX=100',
+    '',
+    '# ── Gemini AI ─────────────────────────────────────────',
+    'GEMINI_API_KEY=your_google_ai_studio_api_key_here',
+    'GEMINI_MODEL=gemini-2.0-flash',
+    '',
+    '# ── Jobs ──────────────────────────────────────────────',
+    'ENABLE_SCHEDULED_JOBS=true',
+    'VENUE_ID=stadiumA',
+  ].join('\n');
+  navigator.clipboard.writeText(lines).then(() => showToast('✓', '.env.example copied to clipboard'));
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(icon, msg) {
+  const t = document.getElementById('toast');
+  t.style.display = 'flex';
+  t.classList.remove('hiding');
+  t.innerHTML = `<span class="toast-icon">${icon}</span>${msg}`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    t.classList.add('hiding');
+    setTimeout(() => { t.style.display = 'none'; }, 220);
+  }, 2200);
+}
+
+// ── JUMP TO TOP ────────────────────────────────────────────────────
+const _jumpBtn = document.getElementById('jumpTop');
+window.addEventListener('scroll', () => {
+  _jumpBtn.classList.toggle('visible', window.scrollY > 280);
+}, { passive: true });
+
+// ── SEARCH INDEX ───────────────────────────────────────────────────
+const SEARCH_INDEX = [
+  // health
+  {icon:'🟢', title:'GET /api/health', sub:'Public · no auth · 503 if DB down', tab:'api'},
+  // fans
+  {icon:'🟣', title:'GET /api/fans/nudge', sub:'Fan app · auth · Haversine 500m filter', tab:'api'},
+  {icon:'🟣', title:'POST /api/fans/route', sub:'Fan app · auth · walking waypoints', tab:'api'},
+  {icon:'🟣', title:'POST /api/fans/confirm', sub:'Fan app · auth · 20-min entry token', tab:'api'},
+  {icon:'🟣', title:'POST /api/fans/feedback', sub:'Fan app · auth · feeds MAPE calibration', tab:'api'},
+  // ops
+  {icon:'🟦', title:'GET /api/ops/wait-times', sub:'Ops · auth · Redis 10s TTL', tab:'api'},
+  {icon:'🟦', title:'GET /api/ops/dashboard', sub:'Ops · auth · materialized view', tab:'api'},
+  {icon:'🟦', title:'GET /api/ops/funnel', sub:'Ops · auth · conversion_funnel view', tab:'api'},
+  {icon:'🟦', title:'POST /api/ops/action', sub:'Ops · auth · broadcasts to all WS clients', tab:'api'},
+  // gates
+  {icon:'🔵', title:'GET /api/gates', sub:'Gate data · auth · all active gates', tab:'api'},
+  {icon:'🔵', title:'GET /api/gates/:id', sub:'Gate data · auth · 404 if missing', tab:'api'},
+  // db tables
+  {icon:'🗄', title:'venues', sub:'Base table · venue_id PK', tab:'db'},
+  {icon:'🗄', title:'events', sub:'Base table · FK → venues', tab:'db'},
+  {icon:'🗄', title:'gates', sub:'Base table · FK → venues · is_active', tab:'db'},
+  {icon:'🗄', title:'queue_observations', sub:'Sensor table · observed_queue_count', tab:'db'},
+  {icon:'🗄', title:'nudges', sub:'TX table · recommended_gate_id FK → gates', tab:'db'},
+  {icon:'🗄', title:'confirmations', sub:'TX table · entry_token PK · 20-min expiry', tab:'db'},
+  {icon:'🗄', title:'gate_entries', sub:'TX table · scan_id PK · wait_time_actual_min', tab:'db'},
+  {icon:'🗄', title:'feedback', sub:'TX table · predictions_accurate BOOLEAN', tab:'db'},
+  {icon:'🗄', title:'ops_actions', sub:'Ops log table · action, gate_id, duration_min', tab:'db'},
+  {icon:'🗄', title:'wait_time_estimates', sub:'History table · confidence NUMERIC', tab:'db'},
+  {icon:'🤖', title:'ai_forecasts', sub:'AI table · Gemini model · confidence_score', tab:'db'},
+  {icon:'👁', title:'journey_complete', sub:'Materialized view · hourly CONCURRENTLY refresh', tab:'db'},
+  {icon:'👁', title:'conversion_funnel', sub:'Materialized view · group by event_date', tab:'db'},
+  // realtime
+  {icon:'⚡', title:'subscribe', sub:'WebSocket · client → server · channel: wait_times', tab:'rt'},
+  {icon:'⚡', title:'ping / pong', sub:'WebSocket · keepalive heartbeat', tab:'rt'},
+  {icon:'⚡', title:'wait_times_updated', sub:'WebSocket broadcast · every 30s', tab:'rt'},
+  {icon:'⚡', title:'ops_action broadcast', sub:'WebSocket · fires on POST /api/ops/action', tab:'rt'},
+  // jobs
+  {icon:'⏱', title:'Wait Time Broadcast', sub:'Jobs · setInterval 30s · broadcastWaitTimes()', tab:'jobs'},
+  {icon:'⏱', title:'Aggregation Job', sub:'Jobs · node-cron 0 * * * * · REFRESH CONCURRENTLY', tab:'jobs'},
+  {icon:'⏱', title:'Forecast Calibration Job', sub:'Jobs · node-cron 0 */6 * * * · MAPE per gate', tab:'jobs'},
+  // env
+  {icon:'🔧', title:'DATABASE_URL', sub:'Env · required · PostgreSQL connection string', tab:'env'},
+  {icon:'🔧', title:'JWT_SECRET', sub:'Env · required · HS256 signing secret', tab:'env'},
+  {icon:'🔧', title:'GEMINI_API_KEY', sub:'Env · required · Google AI Studio key', tab:'env'},
+  {icon:'🔧', title:'ALLOWED_ORIGINS', sub:'Env · required · CORS whitelist', tab:'env'},
+  {icon:'🔧', title:'REDIS_URL', sub:'Env · optional · falls back to in-memory mock', tab:'env'},
+  {icon:'🔧', title:'ENABLE_SCHEDULED_JOBS', sub:'Env · optional · set false in test/CI', tab:'env'},
+  {icon:'🔧', title:'GEMINI_MODEL', sub:'Env · optional · default gemini-2.0-flash', tab:'env'},
+  // errors
+  {icon:'⚠️', title:'400 Bad Request', sub:'Errors · missing or invalid parameters', tab:'errors'},
+  {icon:'⚠️', title:'401 Unauthorized', sub:'Errors · missing or invalid JWT', tab:'errors'},
+  {icon:'⚠️', title:'404 Not Found', sub:'Errors · gate or route not found', tab:'errors'},
+  {icon:'⚠️', title:'409 Conflict', sub:'Errors · duplicate feedback submission', tab:'errors'},
+  {icon:'⚠️', title:'410 Gone', sub:'Errors · entry token expired (20 min)', tab:'errors'},
+  {icon:'⚠️', title:'429 Too Many Requests', sub:'Errors · rate limit 100 req / 15 min', tab:'errors'},
+  {icon:'🔴', title:'500 Internal Server Error', sub:'Errors · unhandled exception, stack hidden in prod', tab:'errors'},
+  {icon:'🔴', title:'503 Service Unavailable', sub:'Errors · DB unreachable, /health only', tab:'errors'},
+];
+
+let _focusIdx = -1;
+
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 40);
+  runSearch('');
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  _focusIdx = -1;
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('searchOverlay')) closeSearch();
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); return; }
+  if (e.key === 'Escape') closeSearch();
+});
+
+function runSearch(q) {
+  const container = document.getElementById('searchResults');
+  const results = q.trim() === ''
+    ? SEARCH_INDEX.slice(0, 14)
+    : SEARCH_INDEX.filter(r => (r.title + ' ' + r.sub).toLowerCase().includes(q.toLowerCase()));
+  _focusIdx = -1;
+  if (results.length === 0) {
+    container.innerHTML = '<div class="search-empty">No results for "' + q + '"</div>';
+    return;
+  }
+  container.innerHTML = results.map(r =>
+    `<div class="search-result" data-tab="${r.tab}" onclick="goTo('${r.tab}')">
+      <span class="sr-icon">${r.icon}</span>
+      <span class="sr-text">
+        <div class="sr-title">${r.title}</div>
+        <div class="sr-sub">${r.sub}</div>
+      </span>
+      <span class="sr-tag">${r.tab}</span>
+    </div>`
+  ).join('');
+}
+
+function goTo(tab) {
+  const el = document.querySelector(`.tab[data-tab="${tab}"]`);
+  if (el) el.click();
+  closeSearch();
+}
+
+function searchKey(e) {
+  const results = document.querySelectorAll('.search-result');
+  if (!results.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); _focusIdx = Math.min(_focusIdx + 1, results.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); _focusIdx = Math.max(_focusIdx - 1, 0); }
+  else if (e.key === 'Enter' && _focusIdx >= 0) { results[_focusIdx].click(); return; }
+  results.forEach((r, i) => r.classList.toggle('focused', i === _focusIdx));
+  if (results[_focusIdx]) results[_focusIdx].scrollIntoView({ block: 'nearest' });
+}
+</script>
+</body>
+</html>
