@@ -5,6 +5,7 @@
 export interface EnvConfig {
   NODE_ENV: string;
   PORT: number;
+  DATABASE_URL: string;
   DB_HOST: string;
   DB_PORT: number;
   DB_NAME: string;
@@ -45,6 +46,9 @@ export function loadEnv(): EnvConfig {
   return {
     NODE_ENV: getEnvString('NODE_ENV', 'development'),
     PORT: getEnvNumber('PORT', 3000),
+    // Hosted PostgreSQL providers commonly provide one connection URL.
+    // When omitted, the individual DB_* settings below are used instead.
+    DATABASE_URL: getEnvString('DATABASE_URL', ''),
     DB_HOST: getEnvString('DB_HOST', 'localhost'),
     DB_PORT: getEnvNumber('DB_PORT', 5432),
     DB_NAME: getEnvString('DB_NAME', 'gate_intelligence'),
