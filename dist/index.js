@@ -8,6 +8,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 const ws_1 = require("ws");
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -46,10 +47,9 @@ app.use((0, cors_1.default)({
 // ============================================================================
 // BODY PARSING & LOGGING
 // ============================================================================
-app.use(express_1.default.json({ limit: '10mb' }));
-app.use(express_1.default.urlencoded({ limit: '10mb', extended: true }));
+app.use(express_1.default.json({ limit: '100kb' }));
+app.use(express_1.default.urlencoded({ limit: '100kb', extended: true }));
 app.use(logging_1.requestLogger);
-app.use(rate_limit_1.rateLimiter);
 // ============================================================================
 // BOOTSTRAP & INITIALIZATION
 // ============================================================================
@@ -66,17 +66,15 @@ async function bootstrap() {
         // Step 3: Initialize Gemini API
         logging_1.logger.info('Initializing Gemini API...');
         await (0, gemini_1.initializeGemini)();
+        // Setup Rate Limiter using connected Redis
+        app.use((0, rate_limit_1.createRateLimiter)());
         // ====================================================================
         // ROUTES
         // ====================================================================
         // Root
+        app.use(express_1.default.static(path_1.default.join(__dirname, '..')));
         app.get('/', (_req, res) => {
-            res.json({
-                service: 'FIFA 26 Gate Intelligence',
-                version: '1.0.0',
-                status: 'operational',
-                timestamp: new Date().toISOString(),
-            });
+            res.sendFile(path_1.default.join(__dirname, '../index.html'));
         });
         // Health check (no auth)
         app.use('/api/health', health_1.default);
@@ -116,7 +114,10 @@ async function bootstrap() {
                     }
                     catch (error) {
                         logging_1.logger.error({ error }, 'WebSocket message error');
-                        ws.send(JSON.stringify({ type: 'error', message: 'Failed to process message' }));
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            message: 'Failed to process message',
+                        }));
                     }
                 });
                 ws.on('close', () => (0, handlers_1.removeConnection)(ws));

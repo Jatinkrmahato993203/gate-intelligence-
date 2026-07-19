@@ -5,12 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from './logging';
 
-export function errorHandler(
-  error: any,
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): void {
+export function errorHandler(error: any, req: Request, res: Response, _next: NextFunction): void {
   logger.error({
     error: error.message,
     stack: error.stack,

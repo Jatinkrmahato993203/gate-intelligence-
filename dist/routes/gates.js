@@ -4,40 +4,28 @@
 // ============================================================================
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const database_1 = require("../config/database");
-const logging_1 = require("../middleware/logging");
+const gate_service_1 = require("../services/gate.service");
+const asyncHandler_1 = require("../middleware/asyncHandler");
 const router = (0, express_1.Router)();
 /**
  * GET /api/gates
  * Get all active gates.
  */
-router.get('/', async (_req, res) => {
-    try {
-        const result = await database_1.db.query(`SELECT * FROM gates WHERE is_active = true ORDER BY gate_id`);
-        res.json({ gates: result.rows, count: result.rowCount });
-    }
-    catch (error) {
-        logging_1.logger.error({ error }, 'GET /api/gates failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+router.get('/', (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
+    const result = await gate_service_1.GateService.getActiveGates();
+    res.json(result);
+}));
 /**
  * GET /api/gates/:id
  * Get single gate details.
  */
-router.get('/:id', async (req, res) => {
-    try {
-        const result = await database_1.db.query(`SELECT * FROM gates WHERE gate_id = $1`, [req.params.id]);
-        if (!result.rows.length) {
-            res.status(404).json({ error: 'Gate not found' });
-            return;
-        }
-        res.json(result.rows[0]);
+router.get('/:id', (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const gate = await gate_service_1.GateService.getGateById(req.params.id);
+    if (!gate) {
+        res.status(404).json({ error: 'Gate not found' });
+        return;
     }
-    catch (error) {
-        logging_1.logger.error({ error }, 'GET /api/gates/:id failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+    res.json(gate);
+}));
 exports.default = router;
 //# sourceMappingURL=gates.js.map

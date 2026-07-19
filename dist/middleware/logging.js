@@ -24,7 +24,7 @@ exports.logger = (0, pino_1.default)({
 exports.requestLogger = (0, pino_http_1.default)({
     logger: exports.logger,
     autoLogging: {
-        ignore: (req) => (req.url === '/api/health'),
+        ignore: (req) => req.url === '/api/health',
     },
 });
 //# sourceMappingURL=logging.js.map

@@ -15,8 +15,13 @@ class NudgeService {
     static async generateNudge(userId, currentGateId, userLat, userLng) {
         try {
             // Get all active gates with coordinates
-            const allGates = await database_1.db.query(`SELECT gate_id, location_lat, location_lng
+            const allGates = await database_1.db.query(`SELECT gate_id, venue_id, location_lat, location_lng
          FROM gates WHERE is_active = true`);
+            const currentGateInfo = allGates.rows.find((g) => g.gate_id === currentGateId);
+            if (!currentGateInfo) {
+                return { error: 'Invalid current gate ID' };
+            }
+            const venueId = currentGateInfo.venue_id;
             // Find gates within 500m of the user
             const nearbyGates = allGates.rows
                 .map((gate) => ({
@@ -28,14 +33,19 @@ class NudgeService {
             if (!nearbyGates.length) {
                 return { error: 'No nearby alternative gates' };
             }
-            // Calculate wait times
-            const currentWait = await wait_time_service_1.WaitTimeService.calculateWaitForGate(currentGateId);
-            // Find the best alternative
+            // Fetch all wait times for the venue efficiently (hits cache if available)
+            const waitTimesCache = await wait_time_service_1.WaitTimeService.getAllWaitTimes(venueId);
+            const currentWait = waitTimesCache[currentGateId];
+            if (!currentWait) {
+                return { error: 'Current gate wait time unavailable' };
+            }
+            // Find the best alternative using O(1) dictionary lookups
             let bestAlternative = null;
             for (const gate of nearbyGates) {
-                const wait = await wait_time_service_1.WaitTimeService.calculateWaitForGate(gate.gate_id);
-                if (!bestAlternative ||
-                    wait.estimated_wait_min < bestAlternative.wait_min) {
+                const wait = waitTimesCache[gate.gate_id];
+                if (!wait)
+                    continue;
+                if (!bestAlternative || wait.estimated_wait_min < bestAlternative.wait_min) {
                     bestAlternative = {
                         gate_id: gate.gate_id,
                         wait_min: wait.estimated_wait_min,

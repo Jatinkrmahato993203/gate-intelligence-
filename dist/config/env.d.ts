@@ -1,6 +1,7 @@
 export interface EnvConfig {
     NODE_ENV: string;
     PORT: number;
+    DATABASE_URL: string;
     DB_HOST: string;
     DB_PORT: number;
     DB_NAME: string;
@@ -20,6 +21,8 @@ export interface EnvConfig {
     ENABLE_GEMINI_FORECASTING: boolean;
     ENABLE_WEBSOCKET: boolean;
     ENABLE_SCHEDULED_JOBS: boolean;
+    API_KEY: string;
+    JWT_SECRET: string;
 }
 export declare function loadEnv(): EnvConfig;
 export declare const env: EnvConfig;

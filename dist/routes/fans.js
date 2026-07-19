@@ -2,112 +2,78 @@
 // ============================================================================
 // Fan App API Endpoints
 // ============================================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const joi_1 = __importDefault(require("joi"));
 const nudge_service_1 = require("../services/nudge.service");
 const route_service_1 = require("../services/route.service");
-const database_1 = require("../config/database");
-const logging_1 = require("../middleware/logging");
+const fan_service_1 = require("../services/fan.service");
+const asyncHandler_1 = require("../middleware/asyncHandler");
+const validate_1 = require("../middleware/validate");
 const router = (0, express_1.Router)();
+/**
+ * Validation Schemas
+ */
+const nudgeSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    current_gate_id: joi_1.default.string().required(),
+    lat: joi_1.default.number().required(),
+    lng: joi_1.default.number().required(),
+});
+const routeSchema = joi_1.default.object({
+    from_gate_id: joi_1.default.string().required(),
+    to_gate_id: joi_1.default.string().required(),
+});
+const confirmSchema = joi_1.default.object({
+    nudge_id: joi_1.default.string().required(),
+    user_id: joi_1.default.string().required(),
+    selected_gate_id: joi_1.default.string().required(),
+    predicted_wait_min: joi_1.default.number().optional(),
+});
+const feedbackSchema = joi_1.default.object({
+    entry_token: joi_1.default.string().required(),
+    actual_wait_min: joi_1.default.number().optional(),
+    predictions_accurate: joi_1.default.boolean().optional(),
+    experience: joi_1.default.number().optional(),
+});
 /**
  * GET /api/fans/nudge
  * Get nudge recommendation for a fan at a specific location.
  */
-router.get('/nudge', async (req, res) => {
-    try {
-        const { user_id, current_gate_id, lat, lng } = req.query;
-        if (!user_id || !current_gate_id || !lat || !lng) {
-            res.status(400).json({ error: 'Missing required parameters: user_id, current_gate_id, lat, lng' });
-            return;
-        }
-        const nudge = await nudge_service_1.NudgeService.generateNudge(user_id, current_gate_id, parseFloat(lat), parseFloat(lng));
-        res.json(nudge);
-    }
-    catch (error) {
-        logging_1.logger.error({ error }, 'GET /api/fans/nudge failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+router.get('/nudge', (0, validate_1.validate)(nudgeSchema, 'query'), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { user_id, current_gate_id, lat, lng } = req.query;
+    const nudge = await nudge_service_1.NudgeService.generateNudge(user_id, current_gate_id, lat, lng);
+    res.json(nudge);
+}));
 /**
  * POST /api/fans/route
  * Calculate route from one gate to another.
  */
-router.post('/route', async (req, res) => {
-    try {
-        const { from_gate_id, to_gate_id } = req.body;
-        if (!from_gate_id || !to_gate_id) {
-            res.status(400).json({ error: 'Missing gate IDs: from_gate_id, to_gate_id' });
-            return;
-        }
-        const route = await route_service_1.RouteService.calculateRoute(from_gate_id, to_gate_id);
-        res.json(route);
-    }
-    catch (error) {
-        logging_1.logger.error({ error }, 'POST /api/fans/route failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+router.post('/route', (0, validate_1.validate)(routeSchema, 'body'), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { from_gate_id, to_gate_id } = req.body;
+    const route = await route_service_1.RouteService.calculateRoute(from_gate_id, to_gate_id);
+    res.json(route);
+}));
 /**
  * POST /api/fans/confirm
  * Confirm nudge acceptance and issue entry token.
  */
-router.post('/confirm', async (req, res) => {
-    try {
-        const { nudge_id, user_id, selected_gate_id, predicted_wait_min } = req.body;
-        if (!nudge_id || !user_id || !selected_gate_id) {
-            res.status(400).json({ error: 'Missing required fields: nudge_id, user_id, selected_gate_id' });
-            return;
-        }
-        const entryToken = `entr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const expiresAt = new Date(Date.now() + 20 * 60000); // 20-minute expiry
-        await database_1.db.query(`INSERT INTO confirmations
-       (confirmation_id, entry_token, nudge_id, user_id, confirmed_gate_id, predicted_wait_min, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
-            `conf_${Date.now()}`,
-            entryToken,
-            nudge_id,
-            user_id,
-            selected_gate_id,
-            predicted_wait_min || 0,
-            expiresAt,
-        ]);
-        res.json({
-            entry_token: entryToken,
-            expires_at: expiresAt.toISOString(),
-            expires_in_minutes: 20,
-        });
-    }
-    catch (error) {
-        logging_1.logger.error({ error }, 'POST /api/fans/confirm failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+router.post('/confirm', (0, validate_1.validate)(confirmSchema, 'body'), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { nudge_id, user_id, selected_gate_id, predicted_wait_min } = req.body;
+    const result = await fan_service_1.FanService.confirmNudge(nudge_id, user_id, selected_gate_id, predicted_wait_min);
+    res.json(result);
+}));
 /**
  * POST /api/fans/feedback
  * Submit feedback and calibration data.
  */
-router.post('/feedback', async (req, res) => {
-    try {
-        const { entry_token, actual_wait_min, predictions_accurate, experience } = req.body;
-        if (!entry_token) {
-            res.status(400).json({ error: 'Missing entry_token' });
-            return;
-        }
-        await database_1.db.query(`INSERT INTO feedback
-       (feedback_id, entry_token, actual_wait_min, predictions_accurate, experience, created_at)
-       VALUES ($1, $2, $3, $4, $5, NOW())`, [
-            `fbk_${Date.now()}`,
-            entry_token,
-            actual_wait_min || null,
-            predictions_accurate ?? null,
-            experience || null,
-        ]);
-        res.json({ success: true, message: 'Thank you for your feedback!' });
-    }
-    catch (error) {
-        logging_1.logger.error({ error }, 'POST /api/fans/feedback failed');
-        res.status(500).json({ error: String(error) });
-    }
-});
+router.post('/feedback', (0, validate_1.validate)(feedbackSchema, 'body'), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { entry_token, actual_wait_min, predictions_accurate, experience } = req.body;
+    await fan_service_1.FanService.submitFeedback(entry_token, actual_wait_min, predictions_accurate, experience);
+    res.json({ success: true, message: 'Thank you for your feedback!' });
+}));
 exports.default = router;
 //# sourceMappingURL=fans.js.map

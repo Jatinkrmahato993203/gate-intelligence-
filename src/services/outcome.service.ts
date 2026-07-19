@@ -37,7 +37,7 @@ export class OutcomeService {
          LEFT JOIN confirmations c ON c.nudge_id = n.nudge_id
          LEFT JOIN gate_entries ge ON c.entry_token = ge.entry_token
          WHERE DATE(n.created_at) = $1`,
-        [date]
+        [date],
       );
 
       const row = result.rows[0];

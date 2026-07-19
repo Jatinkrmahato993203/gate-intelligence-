@@ -6,8 +6,8 @@ import { createClient, RedisClientType } from 'redis';
 import { env } from './env';
 import { logger } from '../middleware/logging';
 
-let redisClient: RedisClientType;
-let useMockRedis = false;
+export let redisClient: RedisClientType;
+export let useMockRedis = false;
 const mockStore = new Map<string, { value: string; expires?: number }>();
 
 export async function initializeRedis(): Promise<void> {
@@ -89,4 +89,3 @@ export const redis = {
     return redisClient.quit();
   },
 };
-

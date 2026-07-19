@@ -1,5 +1,6 @@
 import { WaitTimeResult } from '../types';
 export declare class WaitTimeService {
+    private static cachedEventStart;
     /**
      * Get all wait times for a venue (with Redis caching).
      */

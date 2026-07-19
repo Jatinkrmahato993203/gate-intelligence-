@@ -22,6 +22,6 @@ export const logger = pino({
 export const requestLogger = pinoHttp({
   logger,
   autoLogging: {
-    ignore: (req) => (req.url === '/api/health'),
+    ignore: (req) => req.url === '/api/health',
   },
 });

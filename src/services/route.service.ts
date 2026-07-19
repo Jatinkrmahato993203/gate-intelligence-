@@ -14,18 +14,16 @@ export class RouteService {
    */
   static async calculateRoute(
     currentGateId: string,
-    targetGateId: string
+    targetGateId: string,
   ): Promise<RouteResult | { error: string }> {
     try {
       const gatesResult = await db.query(
         `SELECT gate_id, location_lat, location_lng FROM gates
          WHERE gate_id IN ($1, $2)`,
-        [currentGateId, targetGateId]
+        [currentGateId, targetGateId],
       );
 
-      const gatesMap = Object.fromEntries(
-        gatesResult.rows.map((g: any) => [g.gate_id, g])
-      );
+      const gatesMap = Object.fromEntries(gatesResult.rows.map((g) => [g.gate_id, g]));
 
       const current = gatesMap[currentGateId];
       const target = gatesMap[targetGateId];
@@ -38,7 +36,7 @@ export class RouteService {
         current.location_lat,
         current.location_lng,
         target.location_lat,
-        target.location_lng
+        target.location_lng,
       );
 
       // 1.4 m/s average walking pace

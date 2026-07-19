@@ -3,17 +3,16 @@
 // Redis Cache Client
 // ============================================================================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redis = void 0;
+exports.redis = exports.useMockRedis = exports.redisClient = void 0;
 exports.initializeRedis = initializeRedis;
 const redis_1 = require("redis");
 const env_1 = require("./env");
 const logging_1 = require("../middleware/logging");
-let redisClient;
-let useMockRedis = false;
+exports.useMockRedis = false;
 const mockStore = new Map();
 async function initializeRedis() {
     try {
-        redisClient = (0, redis_1.createClient)({
+        exports.redisClient = (0, redis_1.createClient)({
             socket: {
                 host: env_1.env.REDIS_HOST,
                 port: env_1.env.REDIS_PORT,
@@ -21,21 +20,21 @@ async function initializeRedis() {
             },
             password: env_1.env.REDIS_PASSWORD || undefined,
         });
-        redisClient.on('error', (err) => {
+        exports.redisClient.on('error', (err) => {
             logging_1.logger.error({ err }, 'Redis client error');
-            useMockRedis = true;
+            exports.useMockRedis = true;
         });
-        redisClient.on('connect', () => logging_1.logger.info('Redis connected'));
-        await redisClient.connect();
+        exports.redisClient.on('connect', () => logging_1.logger.info('Redis connected'));
+        await exports.redisClient.connect();
     }
     catch (error) {
         logging_1.logger.warn('Redis connection failed — falling back to in-memory Mock Redis mode');
-        useMockRedis = true;
+        exports.useMockRedis = true;
     }
 }
 exports.redis = {
     get: (key) => {
-        if (useMockRedis) {
+        if (exports.useMockRedis) {
             const entry = mockStore.get(key);
             if (!entry)
                 return Promise.resolve(null);
@@ -45,26 +44,26 @@ exports.redis = {
             }
             return Promise.resolve(entry.value);
         }
-        return redisClient.get(key);
+        return exports.redisClient.get(key);
     },
     set: (key, value, ttlSeconds) => {
-        if (useMockRedis) {
+        if (exports.useMockRedis) {
             const expires = ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined;
             mockStore.set(key, { value, expires });
             return Promise.resolve('OK');
         }
-        return ttlSeconds ? redisClient.setEx(key, ttlSeconds, value) : redisClient.set(key, value);
+        return ttlSeconds ? exports.redisClient.setEx(key, ttlSeconds, value) : exports.redisClient.set(key, value);
     },
     del: (key) => {
-        if (useMockRedis) {
+        if (exports.useMockRedis) {
             const existed = mockStore.has(key);
             mockStore.delete(key);
             return Promise.resolve(existed ? 1 : 0);
         }
-        return redisClient.del(key);
+        return exports.redisClient.del(key);
     },
     exists: (key) => {
-        if (useMockRedis) {
+        if (exports.useMockRedis) {
             const existed = mockStore.has(key);
             if (existed) {
                 const entry = mockStore.get(key);
@@ -76,13 +75,13 @@ exports.redis = {
             }
             return Promise.resolve(0);
         }
-        return redisClient.exists(key);
+        return exports.redisClient.exists(key);
     },
     quit: () => {
-        if (useMockRedis) {
+        if (exports.useMockRedis) {
             return Promise.resolve('OK');
         }
-        return redisClient.quit();
+        return exports.redisClient.quit();
     },
 };
 //# sourceMappingURL=redis.js.map

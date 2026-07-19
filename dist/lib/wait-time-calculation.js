@@ -119,8 +119,7 @@ function predictArrivalsRuleBased(currentTime, eventStartTime, historicalData, w
 function smoothWaitTime(newEstimate, previousEstimate, confidence) {
     const maxChange = 2;
     if (confidence > 0.85) {
-        return (previousEstimate +
-            Math.max(-maxChange, Math.min(maxChange, newEstimate - previousEstimate)));
+        return (previousEstimate + Math.max(-maxChange, Math.min(maxChange, newEstimate - previousEstimate)));
     }
     else if (confidence > 0.6) {
         return previousEstimate * 0.7 + newEstimate * 0.3;
@@ -149,8 +148,7 @@ function calculateStddev(values) {
     if (values.length < 2)
         return 0;
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-        values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
     return Math.sqrt(variance);
 }
 function percentile(values, p) {

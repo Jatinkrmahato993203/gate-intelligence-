@@ -25,7 +25,7 @@ export function startForecastCalibrateJob(): void {
         if (parseFloat(row.mape_pct) > 20) {
           logger.warn(
             { gate: row.gate_id, mape: row.mape_pct },
-            '⚠️ Low forecast accuracy — gate needs recalibration'
+            '⚠️ Low forecast accuracy — gate needs recalibration',
           );
         }
       });

@@ -30,7 +30,7 @@ export async function handleWebSocketMessage(ws: WebSocket, data: Buffer): Promi
             type: 'subscribed',
             channel: payload?.channel || 'wait_times',
             timestamp: new Date().toISOString(),
-          })
+          }),
         );
         break;
 

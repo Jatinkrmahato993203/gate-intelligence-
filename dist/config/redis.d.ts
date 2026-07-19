@@ -1,3 +1,6 @@
+import { RedisClientType } from 'redis';
+export declare let redisClient: RedisClientType;
+export declare let useMockRedis: boolean;
 export declare function initializeRedis(): Promise<void>;
 export declare const redis: {
     get: (key: string) => Promise<string | null>;

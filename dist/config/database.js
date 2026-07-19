@@ -12,21 +12,123 @@ let pool;
 let useMockDb = false;
 // Mock Data Store
 const mockGates = [
-    { gate_id: 'gate_1', venue_id: 'stadiumA', name: 'North Gate 1', zone: 'entry', location_lat: 40.8148, location_lng: -74.0742, throughput_per_min: 44, max_queue_length: 800, processing_time_sec: 10, crowd_slowdown_factor: 0.85, is_active: true },
-    { gate_id: 'gate_2', venue_id: 'stadiumA', name: 'North Gate 2', zone: 'entry', location_lat: 40.8148, location_lng: -74.0732, throughput_per_min: 38, max_queue_length: 600, processing_time_sec: 12, crowd_slowdown_factor: 0.82, is_active: true },
-    { gate_id: 'gate_3', venue_id: 'stadiumA', name: 'East Gate 3', zone: 'entry', location_lat: 40.8138, location_lng: -74.0722, throughput_per_min: 50, max_queue_length: 1000, processing_time_sec: 8, crowd_slowdown_factor: 0.88, is_active: true },
-    { gate_id: 'gate_4', venue_id: 'stadiumA', name: 'East Gate 4', zone: 'entry', location_lat: 40.8128, location_lng: -74.0722, throughput_per_min: 42, max_queue_length: 750, processing_time_sec: 11, crowd_slowdown_factor: 0.84, is_active: true },
-    { gate_id: 'gate_5', venue_id: 'stadiumA', name: 'South Gate 5', zone: 'entry', location_lat: 40.8108, location_lng: -74.0742, throughput_per_min: 46, max_queue_length: 850, processing_time_sec: 9, crowd_slowdown_factor: 0.86, is_active: true },
-    { gate_id: 'gate_6', venue_id: 'stadiumA', name: 'South Gate 6', zone: 'entry', location_lat: 40.8108, location_lng: -74.0752, throughput_per_min: 40, max_queue_length: 700, processing_time_sec: 10, crowd_slowdown_factor: 0.83, is_active: true },
-    { gate_id: 'gate_7', venue_id: 'stadiumA', name: 'West Gate 7', zone: 'entry', location_lat: 40.8118, location_lng: -74.0762, throughput_per_min: 48, max_queue_length: 900, processing_time_sec: 9, crowd_slowdown_factor: 0.87, is_active: true },
-    { gate_id: 'gate_8', venue_id: 'stadiumA', name: 'West Gate 8', zone: 'entry', location_lat: 40.8128, location_lng: -74.0762, throughput_per_min: 36, max_queue_length: 550, processing_time_sec: 13, crowd_slowdown_factor: 0.80, is_active: true }
+    {
+        gate_id: 'gate_1',
+        venue_id: 'stadiumA',
+        name: 'North Gate 1',
+        zone: 'entry',
+        location_lat: 40.8148,
+        location_lng: -74.0742,
+        throughput_per_min: 44,
+        max_queue_length: 800,
+        processing_time_sec: 10,
+        crowd_slowdown_factor: 0.85,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_2',
+        venue_id: 'stadiumA',
+        name: 'North Gate 2',
+        zone: 'entry',
+        location_lat: 40.8148,
+        location_lng: -74.0732,
+        throughput_per_min: 38,
+        max_queue_length: 600,
+        processing_time_sec: 12,
+        crowd_slowdown_factor: 0.82,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_3',
+        venue_id: 'stadiumA',
+        name: 'East Gate 3',
+        zone: 'entry',
+        location_lat: 40.8138,
+        location_lng: -74.0722,
+        throughput_per_min: 50,
+        max_queue_length: 1000,
+        processing_time_sec: 8,
+        crowd_slowdown_factor: 0.88,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_4',
+        venue_id: 'stadiumA',
+        name: 'East Gate 4',
+        zone: 'entry',
+        location_lat: 40.8128,
+        location_lng: -74.0722,
+        throughput_per_min: 42,
+        max_queue_length: 750,
+        processing_time_sec: 11,
+        crowd_slowdown_factor: 0.84,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_5',
+        venue_id: 'stadiumA',
+        name: 'South Gate 5',
+        zone: 'entry',
+        location_lat: 40.8108,
+        location_lng: -74.0742,
+        throughput_per_min: 46,
+        max_queue_length: 850,
+        processing_time_sec: 9,
+        crowd_slowdown_factor: 0.86,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_6',
+        venue_id: 'stadiumA',
+        name: 'South Gate 6',
+        zone: 'entry',
+        location_lat: 40.8108,
+        location_lng: -74.0752,
+        throughput_per_min: 40,
+        max_queue_length: 700,
+        processing_time_sec: 10,
+        crowd_slowdown_factor: 0.83,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_7',
+        venue_id: 'stadiumA',
+        name: 'West Gate 7',
+        zone: 'entry',
+        location_lat: 40.8118,
+        location_lng: -74.0762,
+        throughput_per_min: 48,
+        max_queue_length: 900,
+        processing_time_sec: 9,
+        crowd_slowdown_factor: 0.87,
+        is_active: true,
+    },
+    {
+        gate_id: 'gate_8',
+        venue_id: 'stadiumA',
+        name: 'West Gate 8',
+        zone: 'entry',
+        location_lat: 40.8128,
+        location_lng: -74.0762,
+        throughput_per_min: 36,
+        max_queue_length: 550,
+        processing_time_sec: 13,
+        crowd_slowdown_factor: 0.8,
+        is_active: true,
+    },
 ];
 const mockEvents = [
-    { event_id: 'fifa26_final', venue_id: 'stadiumA', name: 'FIFA 2026 Final', scheduled_start: new Date(Date.now() + 2 * 3600 * 1000).toISOString(), expected_attendance: 82500 }
+    {
+        event_id: 'fifa26_final',
+        venue_id: 'stadiumA',
+        name: 'FIFA 2026 Final',
+        scheduled_start: new Date(Date.now() + 2 * 3600 * 1000).toISOString(),
+        expected_attendance: 82500,
+    },
 ];
 const mockQueueObservations = {};
 // Initialize queue history with random fluctuating values
-mockGates.forEach(g => {
+mockGates.forEach((g) => {
     let baseQueue = Math.floor(g.max_queue_length * (0.1 + Math.random() * 0.5));
     mockQueueObservations[g.gate_id] = Array.from({ length: 10 }, (_, i) => {
         // Add some random variation
@@ -34,8 +136,8 @@ mockGates.forEach(g => {
         return {
             observed_queue_count: baseQueue,
             observation_source: 'sensor',
-            confidence: 0.90 + Math.random() * 0.08,
-            created_at: new Date(Date.now() - i * 10000).toISOString()
+            confidence: 0.9 + Math.random() * 0.08,
+            created_at: new Date(Date.now() - i * 10000).toISOString(),
         };
     });
 });
@@ -46,7 +148,7 @@ const mockOpsActions = [];
 const mockWaitEstimates = [];
 // Periodically update queue counts randomly to simulate active sensor data stream
 setInterval(() => {
-    mockGates.forEach(g => {
+    mockGates.forEach((g) => {
         const list = mockQueueObservations[g.gate_id];
         const latest = list[0].observed_queue_count;
         // Walk queue up or down slightly
@@ -55,8 +157,8 @@ setInterval(() => {
         list.unshift({
             observed_queue_count: newVal,
             observation_source: 'sensor',
-            confidence: 0.90 + Math.random() * 0.08,
-            created_at: new Date().toISOString()
+            confidence: 0.9 + Math.random() * 0.08,
+            created_at: new Date().toISOString(),
         });
         if (list.length > 20)
             list.pop();
@@ -70,12 +172,14 @@ function simulateQuery(text, params = []) {
     }
     // SELECT gate_id FROM gates WHERE venue_id = $1 AND is_active = true
     if (normText.includes('FROM gates WHERE venue_id = $1 AND is_active = true')) {
-        const rows = mockGates.filter(g => g.venue_id === params[0] && g.is_active).map(g => ({ gate_id: g.gate_id }));
+        const rows = mockGates
+            .filter((g) => g.venue_id === params[0] && g.is_active)
+            .map((g) => ({ gate_id: g.gate_id }));
         return { rows, rowCount: rows.length };
     }
     // SELECT gate_id, throughput_per_min... FROM gates WHERE gate_id = $1
     if (normText.includes('FROM gates WHERE gate_id = $1')) {
-        const rows = mockGates.filter(g => g.gate_id === params[0]);
+        const rows = mockGates.filter((g) => g.gate_id === params[0]);
         return { rows, rowCount: rows.length };
     }
     // SELECT observed_queue_count... FROM queue_observations WHERE gate_id = $1 ORDER BY created_at DESC LIMIT 10
@@ -89,12 +193,18 @@ function simulateQuery(text, params = []) {
     }
     // SELECT gate_id, location_lat, location_lng FROM gates WHERE is_active = true
     if (normText.includes('SELECT gate_id, location_lat, location_lng FROM gates WHERE is_active = true')) {
-        const rows = mockGates.filter(g => g.is_active).map(g => ({ gate_id: g.gate_id, location_lat: g.location_lat, location_lng: g.location_lng }));
+        const rows = mockGates
+            .filter((g) => g.is_active)
+            .map((g) => ({
+            gate_id: g.gate_id,
+            location_lat: g.location_lat,
+            location_lng: g.location_lng,
+        }));
         return { rows, rowCount: rows.length };
     }
     // SELECT gate_id, name, location_lat, location_lng FROM gates WHERE gate_id IN ($1, $2)
     if (normText.includes('FROM gates WHERE gate_id IN ($1, $2)')) {
-        const rows = mockGates.filter(g => params.includes(g.gate_id));
+        const rows = mockGates.filter((g) => params.includes(g.gate_id));
         return { rows, rowCount: rows.length };
     }
     // SELECT * FROM gates WHERE is_active = true ORDER BY gate_id
@@ -103,7 +213,13 @@ function simulateQuery(text, params = []) {
     }
     // INSERT INTO wait_time_estimates
     if (normText.startsWith('INSERT INTO wait_time_estimates')) {
-        const record = { gate_id: params[0], estimated_wait_min: params[1], queue_count: params[2], confidence: params[3], created_at: new Date().toISOString() };
+        const record = {
+            gate_id: params[0],
+            estimated_wait_min: params[1],
+            queue_count: params[2],
+            confidence: params[3],
+            created_at: new Date().toISOString(),
+        };
         mockWaitEstimates.push(record);
         return { rows: [record], rowCount: 1 };
     }
@@ -119,7 +235,7 @@ function simulateQuery(text, params = []) {
             wait_time_recommended_min: params[5],
             time_saved_min: params[6],
             forecast_confidence: params[7],
-            created_at: new Date()
+            created_at: new Date(),
         };
         mockNudges.push(record);
         return { rows: [record], rowCount: 1 };
@@ -134,7 +250,7 @@ function simulateQuery(text, params = []) {
             confirmed_gate_id: params[4],
             predicted_wait_min: params[5],
             expires_at: params[6],
-            created_at: new Date()
+            created_at: new Date(),
         };
         mockConfirmations.push(record);
         return { rows: [record], rowCount: 1 };
@@ -147,7 +263,7 @@ function simulateQuery(text, params = []) {
             actual_wait_min: params[2],
             predictions_accurate: params[3],
             experience: params[4],
-            created_at: new Date()
+            created_at: new Date(),
         };
         mockFeedback.push(record);
         return { rows: [record], rowCount: 1 };
@@ -159,7 +275,7 @@ function simulateQuery(text, params = []) {
             action: params[1],
             gate_id: params[2],
             duration_min: params[3],
-            created_at: new Date()
+            created_at: new Date(),
         };
         mockOpsActions.push(record);
         return { rows: [record], rowCount: 1 };
@@ -170,40 +286,53 @@ function simulateQuery(text, params = []) {
         const countNudges = mockNudges.length;
         const countConfirmations = mockConfirmations.length;
         return {
-            rows: [{
+            rows: [
+                {
                     nudges_sent: countNudges,
                     nudge_engagements: Math.round(countNudges * 0.45),
                     confirmations: countConfirmations,
-                    entries_matched: Math.round(countConfirmations * 0.90),
+                    entries_matched: Math.round(countConfirmations * 0.9),
                     forecast_mape_pct: 12.4,
-                    avg_time_saved_min: 4.8
-                }],
-            rowCount: 1
+                    avg_time_saved_min: 4.8,
+                },
+            ],
+            rowCount: 1,
         };
     }
     if (normText.includes('FROM conversion_funnel')) {
         return {
-            rows: [{
+            rows: [
+                {
                     event_date: new Date().toISOString().split('T')[0],
                     nudges_sent: mockNudges.length || 120,
                     nudge_engagements: Math.round((mockNudges.length || 120) * 0.45),
                     confirmations: mockConfirmations.length || 45,
-                    gate_entries: Math.round((mockConfirmations.length || 45) * 0.90)
-                }],
-            rowCount: 1
+                    gate_entries: Math.round((mockConfirmations.length || 45) * 0.9),
+                },
+            ],
+            rowCount: 1,
         };
     }
     return { rows: [], rowCount: 0 };
 }
 async function initializeDatabase() {
     try {
+        const poolConfig = env_1.env.DATABASE_URL
+            ? { connectionString: env_1.env.DATABASE_URL }
+            : {
+                host: env_1.env.DB_HOST,
+                port: env_1.env.DB_PORT,
+                database: env_1.env.DB_NAME,
+                user: env_1.env.DB_USER,
+                password: env_1.env.DB_PASSWORD,
+            };
+        // Most hosted PostgreSQL services require TLS. Keep certificate
+        // verification relaxed for compatibility with provider-issued URLs.
+        if (env_1.env.DB_SSL) {
+            poolConfig.ssl = { rejectUnauthorized: false };
+        }
         pool = new pg_1.Pool({
-            host: env_1.env.DB_HOST,
-            port: env_1.env.DB_PORT,
-            database: env_1.env.DB_NAME,
-            user: env_1.env.DB_USER,
-            password: env_1.env.DB_PASSWORD,
-            ssl: env_1.env.DB_SSL ? { rejectUnauthorized: false } : false,
+            ...poolConfig,
             max: 20,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 2000,
@@ -234,7 +363,7 @@ exports.db = {
     transaction: async (callback) => {
         if (useMockDb) {
             const mockClient = {
-                query: (text, params) => Promise.resolve(simulateQuery(text, params))
+                query: (text, params) => Promise.resolve(simulateQuery(text, params)),
             };
             return callback(mockClient);
         }

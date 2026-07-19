@@ -24,9 +24,7 @@ import {
  * Get reliable queue count from noisy observations.
  * Uses weighted median + outlier rejection.
  */
-export function getReliableQueueCount(
-  observations: QueueObservation[]
-): number {
+export function getReliableQueueCount(observations: QueueObservation[]): number {
   if (observations.length === 0) return 0;
 
   const recent = observations
@@ -37,9 +35,7 @@ export function getReliableQueueCount(
   const median = percentile(counts, 0.5);
   const stddev = calculateStddev(counts);
 
-  const filtered = recent.filter(
-    (o) => Math.abs(o.observed_queue_count - median) < 2 * stddev
-  );
+  const filtered = recent.filter((o) => Math.abs(o.observed_queue_count - median) < 2 * stddev);
 
   if (filtered.length === 0) return Math.round(median);
 
@@ -47,10 +43,7 @@ export function getReliableQueueCount(
   if (sumWeights === 0) return Math.round(median);
 
   return Math.round(
-    filtered.reduce(
-      (sum, o) => sum + o.observed_queue_count * o.confidence,
-      0
-    ) / sumWeights
+    filtered.reduce((sum, o) => sum + o.observed_queue_count * o.confidence, 0) / sumWeights,
   );
 }
 
@@ -59,8 +52,15 @@ export function getReliableQueueCount(
  * Main function for core estimation logic.
  */
 export function calculateWaitTime(
-  gate: Pick<Gate, 'queue_history' | 'throughput_per_min' | 'processing_time_sec' | 'max_queue_length' | 'crowd_slowdown_factor'>,
-  arrivalForecast: ArrivalForecast
+  gate: Pick<
+    Gate,
+    | 'queue_history'
+    | 'throughput_per_min'
+    | 'processing_time_sec'
+    | 'max_queue_length'
+    | 'crowd_slowdown_factor'
+  >,
+  arrivalForecast: ArrivalForecast,
 ): WaitTimeResult {
   const queue_count = getReliableQueueCount(gate.queue_history);
 
@@ -79,11 +79,10 @@ export function calculateWaitTime(
 
   const forecasted_queue = Math.min(
     queue_count + arrivalForecast.predicted_arrivals,
-    gate.max_queue_length
+    gate.max_queue_length,
   );
 
-  const total_wait_sec =
-    (forecasted_queue / effective_throughput) * 60 + processing_time;
+  const total_wait_sec = (forecasted_queue / effective_throughput) * 60 + processing_time;
   const total_wait_min = total_wait_sec / 60;
 
   const rounded_wait = Math.round(total_wait_min * 2) / 2;
@@ -91,8 +90,7 @@ export function calculateWaitTime(
 
   const observation_confidence =
     gate.queue_history.length > 0 ? gate.queue_history[0].confidence : 0.5;
-  const overall_confidence =
-    observation_confidence * 0.6 + arrivalForecast.confidence * 0.4;
+  const overall_confidence = observation_confidence * 0.6 + arrivalForecast.confidence * 0.4;
 
   let display_as = `${Math.round(rounded_wait)} min`;
   if (overall_confidence < 0.65) {
@@ -115,17 +113,15 @@ export function predictArrivalsRuleBased(
   currentTime: Date,
   eventStartTime: Date,
   historicalData: HistoricalPattern[],
-  weather?: { condition: string; temperature: number }
+  weather?: { condition: string; temperature: number },
 ): ArrivalForecast {
-  const minutesToKickoff = Math.floor(
-    (eventStartTime.getTime() - currentTime.getTime()) / 60000
-  );
+  const minutesToKickoff = Math.floor((eventStartTime.getTime() - currentTime.getTime()) / 60000);
 
   const minuteOfDay = currentTime.getHours() * 60 + currentTime.getMinutes();
   const dayType = determineDayType(currentTime);
 
   const historicalEntry = historicalData.find(
-    (p) => p.minute_of_day === minuteOfDay && p.day_type === dayType
+    (p) => p.minute_of_day === minuteOfDay && p.day_type === dayType,
   );
 
   const baselineArrivals = historicalEntry?.arrival_rate_per_min || 180;
@@ -148,9 +144,7 @@ export function predictArrivalsRuleBased(
     weatherFactor = 0.85;
   }
 
-  const predictedArrivals = Math.round(
-    baselineArrivals * eventMultiplier * weatherFactor * 5
-  );
+  const predictedArrivals = Math.round(baselineArrivals * eventMultiplier * weatherFactor * 5);
 
   return {
     time_window: 'next_5_min',
@@ -174,14 +168,13 @@ export function predictArrivalsRuleBased(
 export function smoothWaitTime(
   newEstimate: number,
   previousEstimate: number,
-  confidence: number
+  confidence: number,
 ): number {
   const maxChange = 2;
 
   if (confidence > 0.85) {
     return (
-      previousEstimate +
-      Math.max(-maxChange, Math.min(maxChange, newEstimate - previousEstimate))
+      previousEstimate + Math.max(-maxChange, Math.min(maxChange, newEstimate - previousEstimate))
     );
   } else if (confidence > 0.6) {
     return previousEstimate * 0.7 + newEstimate * 0.3;
@@ -195,7 +188,7 @@ export function smoothWaitTime(
  */
 export function detectSurge(
   previousQueueCount: number,
-  newQueueCount: number
+  newQueueCount: number,
 ): { isSurge: boolean; severity: 'low' | 'medium' | 'high' } {
   const ratio = newQueueCount / (previousQueueCount + 1);
 
@@ -213,9 +206,7 @@ export function detectSurge(
 function calculateStddev(values: number[]): number {
   if (values.length < 2) return 0;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance =
-    values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-    values.length;
+  const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
   return Math.sqrt(variance);
 }
 
@@ -230,10 +221,7 @@ function percentile(values: number[], p: number): number {
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 }
 
-function interpolate(
-  x: number,
-  lookupTable: { [key: number]: number }
-): number {
+function interpolate(x: number, lookupTable: { [key: number]: number }): number {
   const keys = Object.keys(lookupTable)
     .map(Number)
     .sort((a, b) => a - b);
@@ -264,13 +252,10 @@ function determineDayType(date: Date): 'light' | 'normal' | 'heavy' {
   return 'light';
 }
 
-function calculateTrend(
-  observations: QueueObservation[]
-): 'stable' | 'increasing' | 'decreasing' {
+function calculateTrend(observations: QueueObservation[]): 'stable' | 'increasing' | 'decreasing' {
   if (observations.length < 2) return 'stable';
   const recent = observations.slice(0, 2);
-  const change =
-    recent[0].observed_queue_count - recent[1].observed_queue_count;
+  const change = recent[0].observed_queue_count - recent[1].observed_queue_count;
   if (Math.abs(change) < 10) return 'stable';
   return change > 0 ? 'increasing' : 'decreasing';
 }

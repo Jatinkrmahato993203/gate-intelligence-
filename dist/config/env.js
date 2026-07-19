@@ -22,6 +22,9 @@ function loadEnv() {
     return {
         NODE_ENV: getEnvString('NODE_ENV', 'development'),
         PORT: getEnvNumber('PORT', 3000),
+        // Hosted PostgreSQL providers commonly provide one connection URL.
+        // When omitted, the individual DB_* settings below are used instead.
+        DATABASE_URL: getEnvString('DATABASE_URL', ''),
         DB_HOST: getEnvString('DB_HOST', 'localhost'),
         DB_PORT: getEnvNumber('DB_PORT', 5432),
         DB_NAME: getEnvString('DB_NAME', 'gate_intelligence'),
@@ -41,6 +44,8 @@ function loadEnv() {
         ENABLE_GEMINI_FORECASTING: getEnvBool('ENABLE_GEMINI_FORECASTING', true),
         ENABLE_WEBSOCKET: getEnvBool('ENABLE_WEBSOCKET', true),
         ENABLE_SCHEDULED_JOBS: getEnvBool('ENABLE_SCHEDULED_JOBS', true),
+        API_KEY: getEnvString('API_KEY', 'default-dev-ops-key'),
+        JWT_SECRET: getEnvString('JWT_SECRET', 'default-dev-jwt-secret'),
     };
 }
 exports.env = loadEnv();

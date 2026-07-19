@@ -4,6 +4,7 @@
 
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
+import path from 'path';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -17,7 +18,7 @@ import { initializeGemini } from './config/gemini';
 
 import { errorHandler } from './middleware/error';
 import { requestLogger, logger } from './middleware/logging';
-import { rateLimiter } from './middleware/rate-limit';
+import { createRateLimiter } from './middleware/rate-limit';
 import { validateAuth } from './middleware/auth';
 
 import fansRoutes from './routes/fans';
@@ -25,16 +26,8 @@ import opsRoutes from './routes/ops';
 import gatesRoutes from './routes/gates';
 import healthRoutes from './routes/health';
 
-import {
-  handleWebSocketMessage,
-  addConnection,
-  removeConnection,
-} from './websocket/handlers';
-import {
-  startAggregationJob,
-  startForecastCalibrateJob,
-  startWaitTimeBroadcast,
-} from './jobs';
+import { handleWebSocketMessage, addConnection, removeConnection } from './websocket/handlers';
+import { startAggregationJob, startForecastCalibrateJob, startWaitTimeBroadcast } from './jobs';
 
 const app: Express = express();
 const PORT = env.PORT;
@@ -47,7 +40,7 @@ app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-  })
+  }),
 );
 app.use(compression());
 app.use(
@@ -56,17 +49,16 @@ app.use(
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Venue-ID', 'X-API-Key'],
-  })
+  }),
 );
 
 // ============================================================================
 // BODY PARSING & LOGGING
 // ============================================================================
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ limit: '100kb', extended: true }));
 app.use(requestLogger);
-app.use(rateLimiter);
 
 // ============================================================================
 // BOOTSTRAP & INITIALIZATION
@@ -88,14 +80,17 @@ async function bootstrap(): Promise<void> {
     logger.info('Initializing Gemini API...');
     await initializeGemini();
 
+    // Setup Rate Limiter using connected Redis
+    app.use(createRateLimiter());
+
     // ====================================================================
     // ROUTES
     // ====================================================================
 
     // Root
-    app.use(express.static(require('path').join(__dirname, '..')));
+    app.use(express.static(path.join(__dirname, '..')));
     app.get('/', (_req: Request, res: Response) => {
-      res.sendFile(require('path').join(__dirname, '../index.html'));
+      res.sendFile(path.join(__dirname, '../index.html'));
     });
 
     // Health check (no auth)
@@ -147,7 +142,10 @@ async function bootstrap(): Promise<void> {
           } catch (error) {
             logger.error({ error }, 'WebSocket message error');
             ws.send(
-              JSON.stringify({ type: 'error', message: 'Failed to process message' })
+              JSON.stringify({
+                type: 'error',
+                message: 'Failed to process message',
+              }),
             );
           }
         });
