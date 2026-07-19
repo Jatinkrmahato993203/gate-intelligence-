@@ -13,9 +13,14 @@ describe('WaitTimeCalculation Library', () => {
         { observed_queue_count: 50, confidence: 0.9, timestamp: now, observation_source: 'sensor' },
         { observed_queue_count: 52, confidence: 0.9, timestamp: now, observation_source: 'sensor' },
         { observed_queue_count: 49, confidence: 0.9, timestamp: now, observation_source: 'sensor' },
-        { observed_queue_count: 500, confidence: 0.1, timestamp: now, observation_source: 'sensor' }, // obvious outlier
+        {
+          observed_queue_count: 500,
+          confidence: 0.1,
+          timestamp: now,
+          observation_source: 'sensor',
+        }, // obvious outlier
       ];
-      
+
       const count = getReliableQueueCount(observations);
       // It should be close to 50
       expect(count).toBeGreaterThanOrEqual(49);
@@ -24,13 +29,21 @@ describe('WaitTimeCalculation Library', () => {
   });
 
   describe('calculateWaitTime', () => {
-    const mockGate: Pick<Gate, 'queue_history' | 'throughput_per_min' | 'processing_time_sec' | 'max_queue_length' | 'gate_status' | 'crowd_slowdown_factor'> = {
+    const mockGate: Pick<
+      Gate,
+      | 'queue_history'
+      | 'throughput_per_min'
+      | 'processing_time_sec'
+      | 'max_queue_length'
+      | 'gate_status'
+      | 'crowd_slowdown_factor'
+    > = {
       queue_history: [],
       throughput_per_min: 20,
       processing_time_sec: 15,
       max_queue_length: 500,
       gate_status: 'open',
-      crowd_slowdown_factor: 1
+      crowd_slowdown_factor: 1,
     };
 
     it('calculates wait time based on queue length and throughput', () => {
@@ -42,14 +55,22 @@ describe('WaitTimeCalculation Library', () => {
           historical_pattern: 0,
           event_triggered: false,
           external_signal: null,
-          rule_based_forecast: 0
-        }
+          rule_based_forecast: 0,
+        },
       };
 
-      const gateWithQueue = { ...mockGate, queue_history: [{
-        observed_queue_count: 100, confidence: 1, timestamp: new Date(), observation_source: 'sensor'
-      } as QueueObservation] };
-      
+      const gateWithQueue = {
+        ...mockGate,
+        queue_history: [
+          {
+            observed_queue_count: 100,
+            confidence: 1,
+            timestamp: new Date(),
+            observation_source: 'sensor',
+          } as QueueObservation,
+        ],
+      };
+
       // 100 people / 20 throughput per min = 5 minutes
       // 100 people / 20 throughput per min + processing time logic
       const result = calculateWaitTime(gateWithQueue, forecast);
@@ -65,17 +86,15 @@ describe('WaitTimeCalculation Library', () => {
           historical_pattern: 0,
           event_triggered: false,
           external_signal: null,
-          rule_based_forecast: 100
-        }
+          rule_based_forecast: 100,
+        },
       };
-      
+
       // Initially 0 people in line
       const result = calculateWaitTime(mockGate, forecast);
-      
+
       // With 100 incoming people over the next few minutes, wait time should increase
       expect(result.estimated_wait_min).toBeGreaterThan(0);
     });
   });
-
-
 });
