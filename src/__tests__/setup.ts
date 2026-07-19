@@ -40,6 +40,7 @@ jest.mock('../config/redis', () => ({
 // Mock Rate Limiter to just pass through
 jest.mock('../middleware/rate-limit', () => ({
   createRateLimiter: () => (_req: unknown, _res: unknown, next: NextFunction) => next(),
+  authRateLimiter: () => (_req: unknown, _res: unknown, next: NextFunction) => next(),
 }));
 
 // Mock Gemini
