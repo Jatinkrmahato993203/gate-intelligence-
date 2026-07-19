@@ -34,6 +34,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy compiled code from builder
 COPY --from=builder /build/dist ./dist
+COPY index.html ./
 
 # Expose port
 EXPOSE 3000
