@@ -13,7 +13,8 @@ import fansRoutes from './routes/fans';
 import opsRoutes from './routes/ops';
 import gatesRoutes from './routes/gates';
 import healthRoutes from './routes/health';
-import { createRateLimiter } from './middleware/rate-limit';
+import { createRateLimiter, authRateLimiter } from './middleware/rate-limit';
+import { sanitizeInput } from './middleware/sanitize';
 import hpp from 'hpp';
 
 export function createApp(): Express {
@@ -35,11 +36,20 @@ export function createApp(): Express {
           connectSrc: ["'self'", 'ws:', 'wss:'], // Allow websockets
         },
       },
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+      referrerPolicy: {
+        policy: 'same-origin',
+      },
       crossOriginResourcePolicy: { policy: 'cross-origin' },
       hidePoweredBy: true, // Strips X-Powered-By
     }),
   );
   app.use(hpp()); // Prevent HTTP Parameter Pollution
+  app.use(sanitizeInput); // Deep Input XSS Sanitization
   app.use(compression());
   app.use(
     cors({
@@ -78,11 +88,17 @@ export function createApp(): Express {
   // Fan-facing API
   app.use('/api/fans', validateAuth, fansRoutes);
 
-  // Ops console API
+  // Ops API Endpoints
   app.use('/api/ops', validateAuth, opsRoutes);
 
-  // Gate management API
+  // Gates API Endpoints
   app.use('/api/gates', validateAuth, gatesRoutes);
+
+  // Auth Endpoint (Example) with Brute Force Protection
+  app.post('/api/auth/login', authRateLimiter(), (_req, res) => {
+    // Implement actual login logic here
+    res.json({ message: 'Login endpoint secured with strict rate limiting' });
+  });
 
   // ====================================================================
   // 404 HANDLER
