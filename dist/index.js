@@ -6,50 +6,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
-const path_1 = __importDefault(require("path"));
 const ws_1 = require("ws");
-const cors_1 = __importDefault(require("cors"));
-const helmet_1 = __importDefault(require("helmet"));
-const compression_1 = __importDefault(require("compression"));
 require("dotenv/config");
 const env_1 = require("./config/env");
 const database_1 = require("./config/database");
 const redis_1 = require("./config/redis");
 const gemini_1 = require("./config/gemini");
-const error_1 = require("./middleware/error");
 const logging_1 = require("./middleware/logging");
-const rate_limit_1 = require("./middleware/rate-limit");
-const auth_1 = require("./middleware/auth");
-const fans_1 = __importDefault(require("./routes/fans"));
-const ops_1 = __importDefault(require("./routes/ops"));
-const gates_1 = __importDefault(require("./routes/gates"));
-const health_1 = __importDefault(require("./routes/health"));
+const app_1 = require("./app");
 const handlers_1 = require("./websocket/handlers");
 const jobs_1 = require("./jobs");
-const app = (0, express_1.default)();
 const PORT = env_1.env.PORT;
-// ============================================================================
-// SECURITY MIDDLEWARE
-// ============================================================================
-app.use((0, helmet_1.default)({
-    contentSecurityPolicy: false,
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-}));
-app.use((0, compression_1.default)());
-app.use((0, cors_1.default)({
-    origin: env_1.env.ALLOWED_ORIGINS,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Venue-ID', 'X-API-Key'],
-}));
-// ============================================================================
-// BODY PARSING & LOGGING
-// ============================================================================
-app.use(express_1.default.json({ limit: '100kb' }));
-app.use(express_1.default.urlencoded({ limit: '100kb', extended: true }));
-app.use(logging_1.requestLogger);
 // ============================================================================
 // BOOTSTRAP & INITIALIZATION
 // ============================================================================
@@ -66,36 +34,8 @@ async function bootstrap() {
         // Step 3: Initialize Gemini API
         logging_1.logger.info('Initializing Gemini API...');
         await (0, gemini_1.initializeGemini)();
-        // Setup Rate Limiter using connected Redis
-        app.use((0, rate_limit_1.createRateLimiter)());
-        // ====================================================================
-        // ROUTES
-        // ====================================================================
-        // Root
-        app.use(express_1.default.static(path_1.default.join(__dirname, '..')));
-        app.get('/', (_req, res) => {
-            res.sendFile(path_1.default.join(__dirname, '../index.html'));
-        });
-        // Health check (no auth)
-        app.use('/api/health', health_1.default);
-        // Fan-facing API
-        app.use('/api/fans', auth_1.validateAuth, fans_1.default);
-        // Ops console API
-        app.use('/api/ops', auth_1.validateAuth, ops_1.default);
-        // Gate management API
-        app.use('/api/gates', auth_1.validateAuth, gates_1.default);
-        // ====================================================================
-        // 404 HANDLER
-        // ====================================================================
-        app.use((req, res) => {
-            res.status(404).json({
-                error: 'Not found',
-                path: req.path,
-                method: req.method,
-            });
-        });
-        // Global error handler (must be last)
-        app.use(error_1.errorHandler);
+        // Create the configured Express App
+        const app = (0, app_1.createApp)();
         // ====================================================================
         // WEBSOCKET SERVER
         // ====================================================================
