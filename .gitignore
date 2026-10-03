@@ -3,3 +3,7 @@ dist/
 coverage/
 .env
 .system_generated/
+
+# secrets and build output
+.env
+dist/
